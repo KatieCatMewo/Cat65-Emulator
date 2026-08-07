@@ -37,6 +37,8 @@ import java.util.concurrent.locks.LockSupport;
 public abstract class CMU {
     public  static final int   READ_BUFFER_SIZE   = 512;
     public  static final int   SAMPLER_BUFFER_SIZE = 4 * READ_BUFFER_SIZE; // probably overkill >w<
+    private static final int   AUDIO_BUFFER_SIZE   = 2 * READ_BUFFER_SIZE;
+    private static final int   LINE_BUFFER_SIZE    = 2 * AUDIO_BUFFER_SIZE;
     public  static final int   VISUAL_BUFFER_SIZE  = 2 * READ_BUFFER_SIZE;
     private static final float FILTER_ALPHA = .75f;
 
@@ -199,14 +201,14 @@ public abstract class CMU {
     public static void startAudioThread() {
         Thread audioThread = new Thread(() -> {
             float[] samples;
-            byte[] buffer = new byte[READ_BUFFER_SIZE * 2];
+            byte[] buffer = new byte[AUDIO_BUFFER_SIZE];
 
             int debug_bufferOffset;
 
             try {
                 AudioFormat format = new AudioFormat(Cat65.SAMPLE_RATE, 16, 1, true, false);
                 SourceDataLine line = AudioSystem.getSourceDataLine(format);
-                line.open(format, buffer.length);
+                line.open(format, LINE_BUFFER_SIZE);
                 line.start();
 
                 while (running) {
