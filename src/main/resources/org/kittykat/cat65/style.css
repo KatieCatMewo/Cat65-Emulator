@@ -29,7 +29,7 @@
     -fx-background-insets: 0 0 0 10px;
 }
 
-.CPU-reg {
+.register-view {
     -fx-padding: 0 0 0 25px;
     -fx-border-insets: 0 0 0 25px;
     -fx-background-insets: 0 0 0 25px;

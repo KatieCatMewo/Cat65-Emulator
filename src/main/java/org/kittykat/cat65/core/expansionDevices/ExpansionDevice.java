@@ -31,6 +31,9 @@ public abstract class ExpansionDevice extends ExtraChip {
     protected void makeWindow() {
         window = new Stage();
     }
+    protected void setWindowTitle(String title) {
+        window.setTitle("%s [$%x000] :3c".formatted(title, portNum));
+    }
     public void showWindow() {
         if (window != null) {
             window.show();

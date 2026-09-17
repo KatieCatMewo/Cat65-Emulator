@@ -1,5 +1,6 @@
 package org.kittykat.cat65.ui.window.core;
 
+import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
@@ -10,9 +11,9 @@ import org.kittykat.cat65.core.cpu.CPU;
 import org.kittykat.cat65.ui.window.WindowWithTitle;
 
 public class CPUWindow extends WindowWithTitle {
-    private final CPU cpu;
-
     private static final String[] STATUS_NAMES = {"A", "X", "Y", "S", "P", "PC", "MDR"};
+
+    private final CPU cpu;
     private final VBox statusText;
 
     public CPUWindow(CPU cpu) {
@@ -20,17 +21,19 @@ public class CPUWindow extends WindowWithTitle {
         this.cpu = cpu;
 
         statusText = new VBox(Cat65.SPACING);
+        ObservableList<Node> children = statusText.getChildren();
         for (String statusName : STATUS_NAMES) {
             Label lbl_reg = new Label();
             lbl_reg.setId("reg-%s".formatted(statusName));
-            lbl_reg.getStyleClass().add("CPU-reg");
-            statusText.getChildren().add(lbl_reg);
+            lbl_reg.getStyleClass().add("register-view");
+            children.add(lbl_reg);
         }
         getChildren().add(statusText);
     }
 
     @Override
     public void updateWindow() {
+        String str;
         for (Node node : statusText.getChildren()) {
             if (node instanceof Label label) {
                 String regName = label.getId().substring(4);
@@ -45,13 +48,13 @@ public class CPUWindow extends WindowWithTitle {
                     default        -> 0x00;
                 };
                 if (regName.equals("PC")) {
-                    label.setText("%3s:  %5d  |  %04x  |  %s  |  \"%s\"".formatted(regName, value, value,
-                            EmuHelper.getBinary(value, true), EmuHelper.getAsciiString(value, true)));
+                    str = "%3s:  %5d  |  %04x  |  %s  |  \"%s\"".formatted(regName, value, value,
+                            EmuHelper.getBinary(value, true), EmuHelper.getAsciiString(value, true));
                 } else {
-
-                    label.setText("%3s:  %5d  |    %02x  |          %s  |   \"%s\"".formatted(regName, value, value,
-                            EmuHelper.getBinary(value, false), EmuHelper.getAsciiString(value, false)));
+                    str = "%3s:  %5d  |    %02x  |          %s  |   \"%s\"".formatted(regName, value, value,
+                            EmuHelper.getBinary(value, false), EmuHelper.getAsciiString(value, false));
                 }
+                label.setText(str);
             }
         }
     }

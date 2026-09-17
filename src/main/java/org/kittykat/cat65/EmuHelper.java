@@ -20,6 +20,10 @@ import java.net.URL;
 public abstract class EmuHelper {
     public static final URL CSS = loadResource("style.css");
 
+    public static final double LOG2 = Math.log(2d);
+
+    private static final String[] NOTES = {"C ", "C#", "D ", "D#", "E ", "F ", "F#", "G ", "G#", "A ", "A#", "B "};
+
     public static URL loadResource(String path) {
         return EmuHelper.class.getResource("%s%s".formatted(Cat65.RESOURCE_PATH, path));
     }
@@ -32,10 +36,12 @@ public abstract class EmuHelper {
         }
     }
 
+    public static String getBinary(int value, int bits) {
+        return "%%%ds".formatted(bits).formatted(Integer.toBinaryString(value)).replaceAll(" ", "0");
+    }
     public static String getBinary(int value, boolean is16bit) {
         value &= 0xffff;
-        String bin = "%16s".formatted(Integer.toBinaryString(value)).replaceAll(" ", "0");
-        return bin.substring(is16bit ? 0 : 8, 16);
+        return getBinary(value, 16).substring(is16bit ? 0 : 8, 16);
     }
     public static String getAsciiString(int value, boolean is16bit) {
         if (is16bit) {
@@ -149,5 +155,22 @@ public abstract class EmuHelper {
         } else {
             System.err.println("[!] Could not load the stylesheet...");
         }
+    }
+
+    public static String getNote(double freq) {
+        if (freq < 20d) {
+            return "-  -  --c";
+        }
+
+        double midi = 69 + (12 * (Math.log(freq / 440d) / LOG2));
+
+        int note  = (int) Math.round(midi);
+        int cents = (int) ((midi - note) * 100);
+        boolean negativeCents = cents < 0;
+
+        int noteIndex = Math.floorMod(note, 12);
+        int octave    = note / 12 - 1;
+
+        return "%s%2d %s%02dc".formatted(NOTES[noteIndex], octave, negativeCents? "-" : "+", Math.abs(cents));
     }
 }
