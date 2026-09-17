@@ -441,6 +441,9 @@ public class CPU {
 
         // read $fffc and $fffd to get the PC
         PC = vectorAddress(0);
+
+        // sync NMI edge detector with current line level
+        lastNMI = bus.getNMI();
     }
 
     private boolean pollNMI() {

@@ -49,6 +49,8 @@ abstract class CPUTest {
     }
 
     protected int reset() {
+        bus.irq = false;
+        bus.nmi = false;
         cpu.reset();
         return runToBoundary();
     }

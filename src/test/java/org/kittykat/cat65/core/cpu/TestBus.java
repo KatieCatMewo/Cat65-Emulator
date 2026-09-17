@@ -21,8 +21,6 @@ class TestBus implements Bus {
     }
     @Override
     public boolean getNMI() {
-        boolean edge = nmi;
-        nmi = false;
-        return edge;
+        return !nmi;
     }
 }
