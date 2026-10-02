@@ -20,8 +20,8 @@ import static org.kittykat.cat65.EmuHelper.makeButton;
 import static org.kittykat.cat65.EmuHelper.makeSetting;
 
 public class ConfigWindow extends Window {
-
     private final FileChooser romChooser = new FileChooser();
+    private File romDir = new File(System.getProperty("user.home"));
 
     public final ObjectProperty<NewLineVariant> newLineVariant = new SimpleObjectProperty<>(NewLineVariant.CR);
     public final ObjectProperty<ExpansionPort>  exPort04       = new SimpleObjectProperty<>(ExpansionPort._Disconnected);
@@ -65,15 +65,16 @@ public class ConfigWindow extends Window {
         return controls;
     }
     private Button initRomChooser() {
-        romChooser.setInitialDirectory(new File(System.getProperty("user.home")));
         romChooser.setTitle("Open ROM :3c");
         romChooser.getExtensionFilters().addAll(
                 new ExtensionFilter("ROMs", "*.c65", "*.rom", "*.bin"),
                 new ExtensionFilter("all files", "*")
         );
         return makeButton("Load ROM", event -> {
+            romChooser.setInitialDirectory(romDir);
             File file = romChooser.showOpenDialog(getScene().getWindow());
             if (file != null) {
+                romDir = file.getParentFile();
                 CMU.loadROM(file);
             }
         });
