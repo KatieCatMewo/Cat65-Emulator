@@ -9,11 +9,9 @@ import org.kittykat.cat65.Cat65;
 import org.kittykat.cat65.EmuHelper;
 import org.kittykat.cat65.core.CMU;
 import org.kittykat.cat65.core.ExpansionData;
-import org.kittykat.cat65.ui.window.ConfigWindow;
 import org.kittykat.cat65.ui.window.videoCard.ScreenWindow;
 import org.kittykat.cat65.ui.window.videoCard.VideoSettingsWindow;
 
-import java.lang.reflect.Array;
 import java.nio.IntBuffer;
 import java.util.Arrays;
 
@@ -95,7 +93,7 @@ public class VideoCard extends ExpansionDevice {
                 case 0x4 -> hScroll;
                 case 0x6 -> (lineCounter >> 8);
                 case 0x7 -> (lineCounter & 0x0ff);
-                default  -> CMU.getMDR();
+                default  -> 0x00;
             };
         } else {
             relAddress -= 0x800;

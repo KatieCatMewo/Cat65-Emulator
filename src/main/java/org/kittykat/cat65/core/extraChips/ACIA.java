@@ -3,8 +3,8 @@ package org.kittykat.cat65.core.extraChips;
 import org.kittykat.cat65.core.CMU;
 
 /**
- * I hated this -_-<br>
- * why <b>tf</b> are there two datasheets with different amounts of information???<br>
+ * I hated this -w-<br>
+ * why are there two datasheets with different amounts of information???<br>
  * the datasheet for the w65c51<b><i><u>s</u></i></b> documents pretty much all information except for some little bugs
  * because those bugs are only on the w65c51<b><i><u>n</u></i></b>...<br>
  * but the datasheet for the <i>N</i> version does not document <b>nearly</b> as much information for a lot of things!
@@ -74,7 +74,7 @@ public class ACIA extends ExtraChip {
             case 0b01 -> status | 0b0001_0000;  // stuck TDRE bit
             case 0b10 -> cmd;
             case 0b11 -> ctrl;
-            default   -> CMU.getMDR();
+            default   -> 0x00;
         };
         if (cpu) {
             switch (relAddress) {

@@ -4,7 +4,6 @@ import javafx.scene.Scene;
 import javafx.scene.layout.VBox;
 import org.kittykat.cat65.Cat65;
 import org.kittykat.cat65.EmuHelper;
-import org.kittykat.cat65.core.CMU;
 import org.kittykat.cat65.core.expansionDevices.audio.AudioExpansion;
 import org.kittykat.cat65.core.expansionDevices.audio.HighpassRC;
 import org.kittykat.cat65.ui.window.audioCard.AudioChannelWindow;
@@ -91,19 +90,19 @@ public class AudioCard extends AudioExpansion {
     @Override
     protected int get(int relAddress, boolean cpu) {
         if (relAddress < 0x06) {
-            return (short) switch (relAddress) {
+            return switch (relAddress) {
                 case 0x0 -> 0x02 | ((ctrl >> 4) & 0x0f0);
                 case 0x1 -> ctrl & 0x0ff;
                 case 0x2 -> (noiseVol << 4) | noiseFreq;
                 case 0x3 -> ((tri01Freq & 0xf00) >> 4) | (tri02Freq >> 8);
                 case 0x4 -> tri01Freq & 0x0ff;
                 case 0x5 -> tri02Freq & 0x0ff;
-                default  -> CMU.getMDR();
+                default  -> 0x00;
             };
         } else {
             int p = (relAddress - 0x6) >> 1;
             if (p < 5) {
-                return (short) (((relAddress & 0b0001) == 0) ?
+                return (((relAddress & 0b0001) == 0) ?
                         ((pulseVol[p] << 4) | (pulseFreq[p] >> 8)) :
                         (pulseFreq[p] & 0x0ff));
             }

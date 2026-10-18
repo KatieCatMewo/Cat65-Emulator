@@ -115,7 +115,7 @@ public class VIA extends ExtraChip {
             case 0xc -> peripheralCTRL;
             case 0xd -> irqFlags  | ((irqFlags & irqEnable) != 0 ? 0x80 : 0x00);
             case 0xe -> irqEnable | 0x80;
-            default  -> CMU.getMDR();
+            default  -> 0x00;
         };
     }
     @Override

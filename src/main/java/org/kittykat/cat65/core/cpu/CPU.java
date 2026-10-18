@@ -354,7 +354,7 @@ public class CPU {
     private int P  = 0x00;
     private int PC = 0x0000;
 
-    public int mdr = 0x00;
+    private int mdr = 0x00;
 
     private boolean lastNMI = false;
 
@@ -1154,6 +1154,18 @@ public class CPU {
     }
     public int getPC() {
         return PC;
+    }
+
+    /**
+     * @deprecated
+     * this method should no longer be in use for anything related to the CPU reading from memory
+     * because all open-bus areas should always read as 0x00<br>
+     * it is still usable for the UI like in{@link org.kittykat.cat65.ui.window.core.CPUWindow CPUWindow}to display
+     * the current internal state of the MDR
+    **/
+    @Deprecated
+    public int getMDR() {
+        return mdr;
     }
 
     public boolean isAtInstructionBoundary() {

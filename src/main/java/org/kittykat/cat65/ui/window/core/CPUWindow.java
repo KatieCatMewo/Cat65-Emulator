@@ -6,7 +6,6 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import org.kittykat.cat65.Cat65;
 import org.kittykat.cat65.EmuHelper;
-import org.kittykat.cat65.core.CMU;
 import org.kittykat.cat65.core.cpu.CPU;
 import org.kittykat.cat65.ui.window.WindowWithTitle;
 
@@ -37,6 +36,8 @@ public class CPUWindow extends WindowWithTitle {
         for (Node node : statusText.getChildren()) {
             if (node instanceof Label label) {
                 String regName = label.getId().substring(4);
+
+                @SuppressWarnings("deprecation")
                 int value = switch (regName) {
                     case "A"   -> cpu.getA();
                     case "X"   -> cpu.getX();
@@ -44,9 +45,10 @@ public class CPUWindow extends WindowWithTitle {
                     case "S"   -> cpu.getS();
                     case "P"   -> cpu.getP();
                     case "PC"  -> cpu.getPC();
-                    case "MDR" -> CMU.getMDR();
+                    case "MDR" -> cpu.getMDR();
                     default        -> 0x00;
                 };
+
                 if (regName.equals("PC")) {
                     str = "%3s:  %5d  |  %04x  |  %s  |  \"%s\"".formatted(regName, value, value,
                             EmuHelper.getBinary(value, true), EmuHelper.getAsciiString(value, true));

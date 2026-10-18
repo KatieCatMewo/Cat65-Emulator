@@ -328,10 +328,6 @@ public abstract class CMU {
         return exPort07.doesNotHaveWindow();
     }
 
-    public static int getMDR() {
-        return cpu.mdr;
-    }
-
     public static int getPA(int pinState) {
         // ToDo: get PortA
         return 0x00;
