@@ -35,7 +35,7 @@ public class AudioCard extends AudioExpansion {
     private final int[] pulseCounters = {0x000, 0x000, 0x000, 0x000, 0x000};
     private final int[] pulseStates   = {0b000, 0b000, 0b000, 0b000, 0b000};
 
-    private final HighpassRC filter = new HighpassRC(82_000f, 1e-7f); // 82kOhm, 100nF
+    private final HighpassRC filter = new HighpassRC(10_000f, 2.2e-6f); // 10kOhm, 2.2µF
 
     public AudioCard(int port) {
         super(0b0000_0000_1111, port);
