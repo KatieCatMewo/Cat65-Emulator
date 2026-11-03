@@ -1160,7 +1160,7 @@ public class CPU {
      * @deprecated
      * this method should no longer be in use for anything related to the CPU reading from memory
      * because all open-bus areas should always read as 0x00<br>
-     * it is still usable for the UI like in{@link org.kittykat.cat65.ui.window.core.CPUWindow CPUWindow}to display
+     * it is still usable for the UI like in {@link org.kittykat.cat65.window.CPUStatusController CPUStatusController}to display
      * the current internal state of the MDR
     **/
     @Deprecated

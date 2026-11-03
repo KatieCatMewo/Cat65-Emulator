@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox id="root" prefHeight="750.0" prefWidth="560.0" stylesheets="@../../css/style.css"
+      xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1">
+    <VBox styleClass="container" spacing="5" VBox.vgrow="ALWAYS">
+        <HBox styleClass="box">
+            <Label text="Memory Region: " />
+        </HBox>
+        <ListView fx:id="memView" cache="true" cacheHint="SPEED" VBox.vgrow="ALWAYS" />
+    </VBox>
+</VBox>

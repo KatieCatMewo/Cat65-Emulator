@@ -1,11 +1,12 @@
 package org.kittykat.cat65;
 
-import javafx.scene.layout.*;
 import javafx.application.Application;
-import javafx.scene.Scene;
 import javafx.stage.Stage;
-import org.kittykat.cat65.core.CMU;
-import org.kittykat.cat65.core.ExpansionData;
+import org.kittykat.cat65.core.AudioManager;
+import org.kittykat.cat65.core.MainManager;
+import org.kittykat.cat65.core.DebugData;
+import org.kittykat.cat65.core.expansion.ExpansionData;
+import org.kittykat.cat65.core.expansion.ExpansionManager;
 
 public class Cat65 extends Application {
     public static final String RESOURCE_PATH = "/org/kittykat/cat65/";
@@ -16,31 +17,20 @@ public class Cat65 extends Application {
 
     @Override
     public void stop() {
-        CMU.stop();
+        MainManager.stop();
     }
 
     @Override
     @SuppressWarnings("CallToPrintStackTrace")
     public void start(Stage mainStage) {
         try {
+            ExpansionManager.init();
             ExpansionData.init();
+            DebugData.init();
 
-            BorderPane root = new BorderPane();
-            root.setId("root");
-            root.setCenter(CMU.makeWindow());
-
-            Scene scene = new Scene(root, 1440, 750);
-            EmuHelper.applyCSS(scene);
-
-            mainStage.setTitle("Cat65 Emulator >w<");
-            mainStage.setScene(scene);
-            mainStage.setMaximized(true);
-            mainStage.setOnCloseRequest(event -> stop());
-            mainStage.show();
-
-            CMU.startClockThread();
-            CMU.startAudioThread();
-            CMU.startUiThread();
+            MainManager.startClockThread();
+            AudioManager.startAudioThread();
+            MainManager.startUi(mainStage);
         } catch (Exception e) {
             System.err.println("[!] Uncaught exception in Cat65.start()");
             e.printStackTrace();

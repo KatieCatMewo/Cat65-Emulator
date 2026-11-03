@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.URL?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox id="root" prefHeight="380.0" spacing="5"
+      xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1">
+    <stylesheets>
+        <URL value="@../../css/style.css" />
+        <URL value="@../../css/register-view.css" />
+    </stylesheets>
+    <MenuBar VBox.vgrow="NEVER">
+        <Menu mnemonicParsing="false" text="Audio">
+            <MenuItem mnemonicParsing="false" onAction="#openAdioConfig" text="Preferences" />
+        </Menu>
+        <Menu mnemonicParsing="false" text="Help">
+            <MenuItem mnemonicParsing="false" text="Help" />
+        </Menu>
+    </MenuBar>
+    <VBox styleClass="box" spacing="8" VBox.vgrow="ALWAYS">
+        <VBox fx:id="channelView" id="status" spacing="8" VBox.vgrow="ALWAYS">
+            <HBox>
+                <Label styleClass="register" text="Channel  |   Volume   |            Frequency            |    Counter    |        State        |     Duty      " />
+                <CheckBox fx:id="check_master" mnemonicParsing="false" selected="true" />
+            </HBox>
+        </VBox>
+    </VBox>
+</VBox>

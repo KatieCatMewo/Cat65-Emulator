@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox id="root" prefHeight="400.0" prefWidth="640.0" stylesheets="@../../css/style.css" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1">
+    <TabPane fx:id="tabPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" stylesheets="@../../css/style.css" tabClosingPolicy="UNAVAILABLE">
+        <Tab text="General Settings">
+            <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="9.99999999E15" spacing="5" styleClass="box">
+                <Label text="Clock Period [ns]:" />
+                <HBox spacing="5.0">
+                    <Spinner fx:id="spn_clock" editable="true" />
+                    <Label fx:id="lbl_frequency" maxHeight="1.7976931348623157E308" text="(1.00 MHz)" />
+                </HBox>
+            </VBox>
+        </Tab>
+        <Tab text="Serial Config">
+            <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="9.99999999E15" spacing="5" styleClass="box">
+                <Label text="Serial Newline Mode:" />
+                <ComboBox fx:id="cbx_newLineMode" prefWidth="150.0" />
+            </VBox>
+        </Tab>
+        <Tab text="Expansion">
+            <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="9.99999999E15" spacing="5" styleClass="box">
+                <Label text="Expansion $4:" />
+                <ComboBox fx:id="cbx_ex04" prefWidth="150.0" />
+                <Separator />
+                <Label text="Expansion $7:" />
+                <ComboBox fx:id="cbx_ex07" prefWidth="150.0" />
+            </VBox>
+        </Tab>
+        <Tab text="Video">
+            <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="9.99999999E15"
+                  spacing="5.0" styleClass="box">
+                <CheckBox fx:id="check_vsync" mnemonicParsing="false" selected="true" text="V-Sync">
+                    <tooltip>
+                        <Tooltip text="makes the display only update at the start of V-Blank"/>
+                    </tooltip>
+                </CheckBox>
+                <CheckBox fx:id="check_syncVideoClocks" mnemonicParsing="false" selected="true" text="Sync Clocks">
+                    <tooltip>
+                        <Tooltip text="if enabled, syncs the video pixel clock speed to be proportional to the main CPU clock speed&#xA;this means that the video slows down and speeds up with the CPU, allowing for good slow-motion debugging&#xA;it is recommended that you turn off V-Sync if this is enabled so you can actually see the video signal as it's being generated" />
+                    </tooltip>
+                </CheckBox>
+            </VBox>
+        </Tab>
+        <Tab text="Audio">
+            <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="9.99999999E15" spacing="5" styleClass="box">
+                <Label text="Master Volume:" />
+                <HBox spacing="5.0">
+                    <Spinner fx:id="spn_volume" editable="true" maxHeight="1.7976931348623157E308" />
+                    <Slider fx:id="slider_volume" blockIncrement="1" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minorTickCount="4" showTickLabels="true" showTickMarks="true" value="100" HBox.hgrow="ALWAYS" />
+                </HBox>
+            </VBox>
+        </Tab>
+    </TabPane>
+</VBox>

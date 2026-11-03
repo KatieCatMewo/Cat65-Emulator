@@ -1,0 +1,12 @@
+
+#status {
+    -fx-padding: 0 0 8px 0;
+    -fx-border-insets: 0 0 8px 0;
+    -fx-background-insets: 0 0 8px 0;
+}
+
+.register {
+    -fx-padding: 0 0 0 10px;
+    -fx-border-insets: 0 0 0 10px;
+    -fx-background-insets: 0 0 0 10px;
+}

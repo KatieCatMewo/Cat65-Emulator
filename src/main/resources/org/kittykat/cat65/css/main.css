@@ -1,0 +1,9 @@
+
+.spinner,
+.button {
+    -fx-font-size: large;
+}
+
+#current-clock {
+    -fx-font-size: medium;
+}

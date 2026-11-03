@@ -1,6 +1,6 @@
 package org.kittykat.cat65.core.extraChips;
 
-import org.kittykat.cat65.core.CMU;
+import org.kittykat.cat65.core.MainManager;
 
 public class VIA extends ExtraChip {
     private int ora = 0x00;
@@ -77,13 +77,13 @@ public class VIA extends ExtraChip {
     }
 
     @Override
-    protected int get(int relAddress, boolean cpu) {
+    protected int get(int relAddress, boolean internal) {
         return switch (relAddress) {
             case 0x0 -> {
                 int IRB = 0x00;
                 // latched inputs read as 0x00
                 if ((auxiliaryCTRL & 0b0000_0010) == 0) {
-                    IRB = CMU.getPB(orb & ddrb);
+                    IRB = MainManager.getPB(orb & ddrb);
                 }
                 yield (orb & ddrb) | (IRB & ~ddrb);
             }
@@ -92,21 +92,21 @@ public class VIA extends ExtraChip {
                 int IRA = 0x00;
                 // latched inputs read as 0x00
                 if ((auxiliaryCTRL & 0b0000_0001) == 0) {
-                    IRA = CMU.getPA(ora & ddra);
+                    IRA = MainManager.getPA(ora & ddra);
                 }
                 yield IRA;
             }
             case 0x2 -> ddrb;
             case 0x3 -> ddra;
             case 0x4 -> {
-                clearT1IRQ(cpu);
+                clearT1IRQ(internal);
                 yield t1Counter & 0x00ff;
             }
             case 0x5 -> (t1Counter & 0xff00) >> 8;
             case 0x6 -> t1Latch & 0x00ff;
             case 0x7 -> (t1Latch & 0xff00) >> 8;
             case 0x8 -> {
-                clearT2IRQ(cpu);
+                clearT2IRQ(internal);
                 yield t2Counter & 0x00ff;
             }
             case 0x9 -> (t2Counter & 0xff00) >> 8;
@@ -119,7 +119,7 @@ public class VIA extends ExtraChip {
         };
     }
     @Override
-    protected void set(int relAddress, int value, boolean cpu) {
+    protected void set(int relAddress, int value, boolean internal) {
         switch (relAddress) {
             case 0x0 -> {
                 orb = value;
@@ -143,18 +143,18 @@ public class VIA extends ExtraChip {
             case 0x5 -> {
                 t1Latch = (t1Latch & 0x00ff) | (value << 8);
                 t1Counter = t1Latch;
-                clearT1IRQ(cpu);
+                clearT1IRQ(internal);
                 t1Running = true;
                 t1SetIRQ  = true;
             }
             case 0x7 -> {
                 t1Latch = (t1Latch & 0x00ff) | (value << 8);
-                clearT1IRQ(cpu);
+                clearT1IRQ(internal);
             }
             case 0x8 -> t2Latch = (t2Latch & 0xff00) | value;
             case 0x9 -> {
                 t2Counter = t2Latch | (value << 8);
-                clearT2IRQ(cpu);
+                clearT2IRQ(internal);
                 t2Running = true;
                 t2SetIRQ  = true;
             }
@@ -174,21 +174,21 @@ public class VIA extends ExtraChip {
         }
     }
 
-    private void clearT1IRQ(boolean cpu) {
-        if (cpu) {
+    private void clearT1IRQ(boolean internal) {
+        if (internal) {
             irqFlags &= 0b1011_1111;
         }
     }
-    private void clearT2IRQ(boolean cpu) {
-        if (cpu) {
+    private void clearT2IRQ(boolean internal) {
+        if (internal) {
             irqFlags &= 0b1101_1111;
         }
     }
 
     private void updatePAO() {
-        CMU.setPA(ora & ddra);
+        MainManager.setPA(ora & ddra);
     }
     private void updatePBO() {
-        CMU.setPB(orb & ddrb);
+        MainManager.setPB(orb & ddrb);
     }
 }

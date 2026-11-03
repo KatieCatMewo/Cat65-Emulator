@@ -1,6 +1,6 @@
 package org.kittykat.cat65.core.extraChips;
 
-import org.kittykat.cat65.core.CMU;
+import org.kittykat.cat65.core.ConfigManager;
 
 /**
  * I hated this -w-<br>
@@ -28,7 +28,7 @@ public class ACIA extends ExtraChip {
 
             // receiver echo mode
             if ((cmd & 0b0001_1100) == 0b0001_0000) {
-                CMU.terminalPrint(c);
+                ConfigManager.outputSerial(c);
             }
         }
     }
@@ -53,7 +53,8 @@ public class ACIA extends ExtraChip {
     @Override
     public void clock() {
         // I know this ignores the baud rate, but it's an emulator and I don't really care tbh >w<
-        if (!CMU.isSerialInputEmpty()) checkReceivedChar(CMU.pollSerialInput());
+        if (!ConfigManager.isSerialBufferEmpty())
+            checkReceivedChar(ConfigManager.pollSerial());
     }
     @Override
     public void reset() {
@@ -68,7 +69,7 @@ public class ACIA extends ExtraChip {
     }
 
     @Override
-    protected int get(int relAddress, boolean cpu) {
+    protected int get(int relAddress, boolean internal) {
         int value = switch (relAddress) {
             case 0b00 -> receiveData;
             case 0b01 -> status | 0b0001_0000;  // stuck TDRE bit
@@ -76,7 +77,7 @@ public class ACIA extends ExtraChip {
             case 0b11 -> ctrl;
             default   -> 0x00;
         };
-        if (cpu) {
+        if (internal) {
             switch (relAddress) {
                 case 0b00 -> status &= 0b1111_0000;  // clear certain status register bits on RDR read
                 case 0b01 -> status &= 0b0111_1111;  // clear interrupt flag on status read
@@ -85,11 +86,11 @@ public class ACIA extends ExtraChip {
         return value;
     }
     @Override
-    protected void set(int relAddress, int value, boolean cpu) {
+    protected void set(int relAddress, int value, boolean internal) {
         switch (relAddress) {
             case 0b00 -> {
                 // only enable transmitter if DTR is 1
-                if ((cmd & 0b0000_0001) != 0) CMU.terminalPrint((char) value);
+                if ((cmd & 0b0000_0001) != 0) ConfigManager.outputSerial((char) value);
             }
             case 0b01 -> {
                 // soft reset

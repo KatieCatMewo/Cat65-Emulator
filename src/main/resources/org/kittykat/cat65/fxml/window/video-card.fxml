@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.image.ImageView?>
+
+<VBox id="root" prefHeight="550.0" prefWidth="700.0" spacing="5" stylesheets="@../../css/style.css"
+      xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1">
+    <MenuBar VBox.vgrow="NEVER">
+        <Menu mnemonicParsing="false" text="Video">
+            <MenuItem mnemonicParsing="false" onAction="#openVideoConfig" text="Preferences" />
+        </Menu>
+        <Menu mnemonicParsing="false" text="Help">
+            <MenuItem mnemonicParsing="false" text="Help" />
+        </Menu>
+    </MenuBar>
+    <VBox alignment="CENTER" spacing="5" styleClass="box" VBox.vgrow="ALWAYS">
+        <ImageView fx:id="screen" preserveRatio="true" smooth="false" styleClass="screen" />
+    </VBox>
+</VBox>

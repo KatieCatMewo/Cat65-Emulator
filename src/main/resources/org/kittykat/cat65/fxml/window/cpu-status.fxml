@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.URL?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox id="root" prefWidth="440" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1">
+    <stylesheets>
+        <URL value="@../../css/style.css" />
+        <URL value="@../../css/register-view.css" />
+    </stylesheets>
+    <VBox spacing="8" styleClass="box" VBox.vgrow="ALWAYS">
+        <Label styleClass="title" text="CPU Status" />
+        <VBox fx:id="statusText" id="status" spacing="8" VBox.vgrow="ALWAYS">
+            <Label id="reg-A" styleClass="register" text="Accumulator" />
+            <Label id="reg-X" styleClass="register" text="Register X" />
+            <Label id="reg-Y" styleClass="register" text="Register Y" />
+            <Label id="reg-S" styleClass="register" text="Stack Pointer" />
+            <Label id="reg-P" styleClass="register" text="Processor Flags" />
+            <Label id="reg-PC" styleClass="register" text="Program Counter" />
+            <Label id="reg-MDR" styleClass="register" text="Memory Data Register" />
+        </VBox>
+    </VBox>
+</VBox>

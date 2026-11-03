@@ -1,15 +1,12 @@
 package org.kittykat.cat65;
 
+import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
-import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.geometry.HPos;
 import javafx.scene.Scene;
 import javafx.scene.chart.NumberAxis;
-import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
-import javafx.scene.layout.*;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory;
 import javafx.util.StringConverter;
 
 import java.io.FileNotFoundException;
@@ -76,70 +73,6 @@ public abstract class EmuHelper {
         return (v & 0x7f) - (v & 0x80);
     }
 
-    public static Button makeButton(String text, EventHandler<ActionEvent> eventHandler) {
-        Button btn = new Button(text);
-        btn.setOnAction(eventHandler);
-        return btn;
-    }
-    public static <E extends Enum<E>> ComboBox<E> makeSetting(ObjectProperty<E> property, Class<E> enumClass, StringConverter<E> converter) {
-        ComboBox<E> comboBox = new ComboBox<>();
-        comboBox.getItems().addAll(enumClass.getEnumConstants());
-        comboBox.valueProperty().bindBidirectional(property);
-        comboBox.setConverter(converter);
-        return comboBox;
-    }
-
-    public static GridPane makeGridBase() {
-        GridPane grid = new GridPane(Cat65.SPACING, Cat65.SPACING);
-        grid.getStyleClass().add("grid-pane");
-        grid.setGridLinesVisible(false);
-        return grid;
-    }
-    public static RowConstraints makeRowConstraint() {
-        RowConstraints row = new RowConstraints();
-        row.setVgrow(Priority.ALWAYS);
-        row.setFillHeight(true);
-        return row;
-    }
-    public static ColumnConstraints makeColumnConstraint(HPos horizontalAlignment) {
-        ColumnConstraints col = new ColumnConstraints();
-        col.setHgrow(Priority.ALWAYS);
-        col.setFillWidth(true);
-        col.setHalignment(horizontalAlignment);
-        return col;
-    }
-    public static void setupColumns(GridPane grid, int columns, HPos horizontalAlignment) {
-        ObservableList<ColumnConstraints> columnConstraints = grid.getColumnConstraints();
-        float columnPercent = 100f / columns;
-        for (int c = 0; c < columns; c++) {
-            ColumnConstraints col = makeColumnConstraint(horizontalAlignment);
-            col.setPercentWidth(columnPercent);
-            columnConstraints.add(col);
-        }
-    }
-    public static GridPane makeGrid(int rows, int columns, HPos horizontalAlignment) {
-        GridPane grid = makeGridBase();
-
-        ObservableList<RowConstraints> rowConstraints = grid.getRowConstraints();
-        float rowPercent = 100f / rows;
-        for (int r = 0; r < rows; r++) {
-            RowConstraints row = makeRowConstraint();
-            row.setPercentHeight(rowPercent);
-            rowConstraints.add(row);
-        }
-        setupColumns(grid, columns, horizontalAlignment);
-        return grid;
-    }
-    public static GridPane makeFreeGrid(int rows, int columns, HPos horizontalAlignment) {
-        GridPane grid = makeGridBase();
-
-        for (int r = 0; r < rows; r++) {
-            grid.getRowConstraints().add(makeRowConstraint());
-        }
-        setupColumns(grid, columns, horizontalAlignment);
-        return grid;
-    }
-
     public static NumberAxis makeNumberAxis(double min, double max, double tickUnit) {
         NumberAxis axis = new NumberAxis();
         axis.setAutoRanging(false);
@@ -147,6 +80,55 @@ public abstract class EmuHelper {
         axis.setUpperBound(max);
         axis.setTickUnit(tickUnit);
         return axis;
+    }
+
+    public static void setupIntSpinner(Spinner<Integer> spinner, int min, int max, int initial, int step) {
+        SpinnerValueFactory.IntegerSpinnerValueFactory factory = new SpinnerValueFactory.IntegerSpinnerValueFactory(min, max, initial, step);
+        spinner.setValueFactory(factory);
+        StringConverter<Integer> converter = factory.getConverter();
+        factory.setConverter(new StringConverter<>() {
+            @Override public String toString(Integer v) {
+                return converter.toString(v);
+            }
+            @Override public Integer fromString(String s) {
+                try {
+                    return converter.fromString(s);
+                } catch (NumberFormatException e) {
+                    spinner.cancelEdit();
+                    return factory.getValue();
+                }
+            }
+        });
+        spinner.focusedProperty().addListener((obs, was, is) -> {
+            if (!is) spinner.commitValue();
+        });
+    }
+    public static void bindSpinner(Spinner<Integer> spinner, IntegerProperty property) {
+        property.addListener(
+                (obs, oldValue, newValue) -> spinner.getValueFactory().setValue(newValue.intValue())
+        );
+        spinner.getValueFactory().valueProperty().addListener(
+                (obs, oldValue, newValue) -> property.set(newValue)
+        );
+    }
+
+    public static <E extends Enum<E>> void setupComboBox(ComboBox<E> comboBox, ObjectProperty<E> property,
+                                                         Class<E> enumClass, StringConverter<E> converter) {
+        comboBox.getItems().addAll(enumClass.getEnumConstants());
+        comboBox.valueProperty().bindBidirectional(property);
+        comboBox.setConverter(converter);
+    }
+
+    public static String formatFrequency(double frequency) {
+        String unit = "Hz";
+        if (frequency >= 1_000_000d) {
+            frequency /= 1_000_000d;
+            unit = "MHz";
+        } else if (frequency >= 1_000d) {
+            frequency /= 1_000d;
+            unit = "kHz";
+        }
+        return "%.2f %s".formatted(frequency, unit);
     }
 
     public static void applyCSS(Scene scene) {

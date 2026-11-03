@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.URL?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox id="root" prefHeight="380.0" prefWidth="450.0" spacing="5"
+      xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1">
+    <stylesheets>
+        <URL value="@../../css/style.css" />
+        <URL value="@../../css/main.css" />
+    </stylesheets>
+    <MenuBar>
+        <Menu mnemonicParsing="false" text="File">
+            <MenuItem mnemonicParsing="false" onAction="#openROM" text="Open" />
+            <SeparatorMenuItem mnemonicParsing="false" />
+            <MenuItem mnemonicParsing="false" onAction="#onClose" text="Exit" />
+        </Menu>
+        <Menu mnemonicParsing="false" text="Settings">
+            <MenuItem fx:id="mi_pause" mnemonicParsing="false" onAction="#togglePause" text="Pause" />
+            <MenuItem mnemonicParsing="false" onAction="#step" text="Step" />
+            <MenuItem mnemonicParsing="false" onAction="#onReset" text="Reset" />
+            <SeparatorMenuItem mnemonicParsing="false" />
+            <MenuItem mnemonicParsing="false" onAction="#openConfig" text="Preferences" />
+        </Menu>
+        <Menu mnemonicParsing="false" text="View">
+            <MenuItem mnemonicParsing="false" onAction="#openSerialTerminal" text="Serial Terminal" />
+            <MenuItem mnemonicParsing="false" onAction="#openLCD" text="LCD Screen" />
+        </Menu>
+        <Menu mnemonicParsing="false" text="Expansion">
+            <MenuItem mnemonicParsing="false" onAction="#viewEx04" text="Port $4" />
+            <MenuItem mnemonicParsing="false" onAction="#viewEx07" text="Port $7" />
+            <SeparatorMenuItem mnemonicParsing="false" />
+            <MenuItem mnemonicParsing="false" onAction="#openExpansionSetup" text="Expansion Setup"/>
+        </Menu>
+        <Menu mnemonicParsing="false" text="Debug">
+            <MenuItem mnemonicParsing="false" onAction="#openCpuStatus" text="CPU Status" />
+            <MenuItem mnemonicParsing="false" onAction="#openMemoryView" text="Memory Viewer" />
+            <SeparatorMenuItem mnemonicParsing="false" />
+            <MenuItem mnemonicParsing="false" onAction="#openAudioDebug" text="Audio Debug"/>
+        </Menu>
+        <Menu mnemonicParsing="false" text="Help">
+            <MenuItem mnemonicParsing="false" text="About" />
+        </Menu>
+    </MenuBar>
+    <GridPane hgap="5.0" prefHeight="471.0" prefWidth="465.0" styleClass="box" vgap="5.0">
+        <columnConstraints>
+            <ColumnConstraints hgrow="ALWAYS" percentWidth="25.0"/>
+            <ColumnConstraints hgrow="ALWAYS" percentWidth="25.0"/>
+            <ColumnConstraints hgrow="ALWAYS" percentWidth="25.0"/>
+            <ColumnConstraints hgrow="ALWAYS" percentWidth="25.0"/>
+        </columnConstraints>
+        <rowConstraints>
+            <RowConstraints percentHeight="20.0" vgrow="ALWAYS"/>
+            <RowConstraints percentHeight="20.0" vgrow="ALWAYS"/>
+            <RowConstraints percentHeight="20.0" vgrow="ALWAYS"/>
+            <RowConstraints percentHeight="20.0" vgrow="ALWAYS"/>
+            <RowConstraints percentHeight="20.0" vgrow="ALWAYS"/>
+        </rowConstraints>
+        <Button alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
+                mnemonicParsing="false" onAction="#openROM" text="Load ROM" GridPane.halignment="CENTER"
+                GridPane.hgrow="ALWAYS" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS"/>
+        <Label fx:id="lbl_paused" alignment="CENTER" maxHeight="1.7976931348623157E308"
+               maxWidth="1.7976931348623157E308" text="Paused" GridPane.columnIndex="1" GridPane.halignment="CENTER"
+               GridPane.hgrow="ALWAYS" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS"/>
+        <Button maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false"
+                onAction="#step" text="Step" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1"
+                GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS"/>
+        <Button fx:id="btn_pause" alignment="CENTER" maxHeight="1.7976931348623157E308"
+                maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#togglePause" text="Resume"
+                GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1"
+                GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS"/>
+        <Button alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
+                mnemonicParsing="false" onAction="#onReset" text="Reset" GridPane.columnIndex="2"
+                GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.valignment="CENTER"
+                GridPane.vgrow="ALWAYS"/>
+        <Button maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false"
+                onAction="#openSerialTerminal" text="Open Terminal" GridPane.columnSpan="2" GridPane.halignment="CENTER"
+                GridPane.hgrow="ALWAYS" GridPane.rowIndex="2" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS"/>
+        <Button layoutX="53.0" layoutY="119.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
+                mnemonicParsing="false" onAction="#openLCD" text="View LCD Screen" GridPane.columnIndex="2"
+                GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2"
+                GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS"/>
+        <Button maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false"
+                onAction="#openConfig" text="Preferences" GridPane.columnSpan="2" GridPane.halignment="CENTER"
+                GridPane.hgrow="ALWAYS" GridPane.rowIndex="3" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS"/>
+        <Spinner fx:id="spn_clock" editable="true" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
+                 GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS"
+                 GridPane.rowIndex="4" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS"/>
+        <VBox alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
+              GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="4"
+              GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS">
+            <Label alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
+                   text="Clock Period [ns]:"/>
+            <Label fx:id="lbl_targetFrequency" alignment="CENTER" maxHeight="1.7976931348623157E308"
+                   maxWidth="1.7976931348623157E308" text="(1.00 MHz)"/>
+            <Label fx:id="lbl_currentFrequency" id="current-clock" alignment="CENTER" maxHeight="1.7976931348623157E308"
+                   maxWidth="1.7976931348623157E308" text="(1.00 MHz)"/>
+        </VBox>
+    </GridPane>
+</VBox>
