@@ -18,7 +18,6 @@ public class SerialTerminalController extends WindowController {
 
     public SerialTerminalController() {
         super("Cat65 Serial Terminal", "serial-terminal");
-        window.getStage().setMaximized(true);
     }
 
     @FXML
