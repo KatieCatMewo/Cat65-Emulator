@@ -14,7 +14,7 @@ public abstract class ExpansionData {
     public static final byte[] colorG = new byte[COLOR_ROM_SIZE];
     public static final byte[] colorB = new byte[COLOR_ROM_SIZE];
 
-    public static void init() {
+    static {
         loadColormap("red",   colorR);
         loadColormap("green", colorG);
         loadColormap("blue",  colorB);

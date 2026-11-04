@@ -15,7 +15,7 @@ public abstract class ExpansionManager {
     public static volatile ExpansionDevice ex04 = new DisconnectedPort();
     public static volatile ExpansionDevice ex07 = new DisconnectedPort();
 
-    public static void init() {
+    static {
         ex04Property.addListener((obs, oldVal, newVal) -> setEx04(newVal));
         ex07Property.addListener((obs, oldVal, newVal) -> setEx07(newVal));
     }

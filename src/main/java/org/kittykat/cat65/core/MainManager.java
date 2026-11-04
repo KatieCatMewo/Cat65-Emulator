@@ -77,6 +77,7 @@ public abstract class MainManager {
             long timeAccumulator = 0L;
             long currentTime;
             long sleepTime;
+            int clockPeriod;
 
             while (running) {
                 currentTime = System.nanoTime();
@@ -85,7 +86,7 @@ public abstract class MainManager {
 
                 timeAccumulator += timeSinceLastClock;
 
-                while (timeAccumulator >= ConfigManager.clockPeriodProperty.get()) {
+                while (timeAccumulator >= ConfigManager.clockPeriod) {
                     if (!paused || step) {
                         if (reset) {
                             reset();
@@ -96,10 +97,10 @@ public abstract class MainManager {
                         DebugData.executedClocks++;
                     }
                     AudioManager.clockAudio();
-                    timeAccumulator -= ConfigManager.clockPeriodProperty.get();
+                    timeAccumulator -= ConfigManager.clockPeriod;
                 }
 
-                sleepTime = ConfigManager.clockPeriodProperty.get() - timeAccumulator;
+                sleepTime = ConfigManager.clockPeriod - timeAccumulator;
                 if (sleepTime > 0L) {
                     LockSupport.parkNanos(sleepTime);
                 }

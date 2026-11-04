@@ -66,7 +66,7 @@ public class VideoCard extends ExpansionDevice {
     @Override
     @SuppressWarnings("NonAtomicOperationOnVolatileField")
     public void clock() {
-        timeAccumulator += CLOCK_MHZ * (ConfigManager.syncVideoClocksProperty.get() ? 1d : (ConfigManager.clockPeriodProperty.get() / 1_000d));
+        timeAccumulator += CLOCK_MHZ * (ConfigManager.syncVideoClocks ? 1d : (ConfigManager.clockPeriod / 1_000d));
         while (timeAccumulator >= 1f) {
             videoClock();
             timeAccumulator -= 1f;
@@ -164,7 +164,7 @@ public class VideoCard extends ExpansionDevice {
             if (lineCounter == V_VISIBLE) {
                 vBlank = true;
 
-                if (ConfigManager.vsyncProperty.get()) {
+                if (ConfigManager.vsync) {
                     System.arraycopy(frame, 0, colorBuffer, 0, frame.length);
                     Platform.runLater(this::updateScreen);
                 }
@@ -253,7 +253,7 @@ public class VideoCard extends ExpansionDevice {
     @Override
     public void updateWindow() {
         super.updateWindow();
-        if (!ConfigManager.vsyncProperty.get()) {
+        if (!ConfigManager.vsync) {
             System.arraycopy(frame, 0, colorBuffer, 0, frame.length);
             updateScreen();
         }

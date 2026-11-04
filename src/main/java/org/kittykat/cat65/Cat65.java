@@ -4,9 +4,6 @@ import javafx.application.Application;
 import javafx.stage.Stage;
 import org.kittykat.cat65.core.AudioManager;
 import org.kittykat.cat65.core.MainManager;
-import org.kittykat.cat65.core.DebugData;
-import org.kittykat.cat65.core.expansion.ExpansionData;
-import org.kittykat.cat65.core.expansion.ExpansionManager;
 
 public class Cat65 extends Application {
     public static final String RESOURCE_PATH = "/org/kittykat/cat65/";
@@ -20,9 +17,6 @@ public class Cat65 extends Application {
     @SuppressWarnings("CallToPrintStackTrace")
     public void start(Stage mainStage) {
         try {
-            ExpansionManager.init();
-            ExpansionData.init();
-
             MainManager.startClockThread();
             AudioManager.startAudioThread();
             MainManager.startUi(mainStage);
