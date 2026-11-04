@@ -51,7 +51,7 @@ public class AudioChannelController extends WindowController {
                 audioCard.channelStates[channel] = enabled;
                 lbl_reg.setDisable(!enabled);
             });
-            children.add(new HBox(Cat65.SPACING, lbl_reg, channelEnable));
+            children.add(new HBox(8d, lbl_reg, channelEnable));
         }
     }
 

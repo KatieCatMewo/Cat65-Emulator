@@ -8,29 +8,22 @@ import javafx.scene.chart.XYChart;
 import java.util.ArrayList;
 
 public abstract class DebugData {
-    public static final int VISUAL_BUFFER_SIZE  = 2 * AudioManager.READ_BUFFER_SIZE;
+    public static final int VISUAL_AUDIO_BUFFER_SIZE = 2 * AudioManager.READ_BUFFER_SIZE;
 
     public  static final float MIN_AUDIO_SCALE     = 1f;
     public  static final float MAX_AUDIO_SCALE     = .1f;
     public  static final float DEFAULT_AUDIO_SCALE = MIN_AUDIO_SCALE;
     public  static final FloatProperty audioScaleProperty = new SimpleFloatProperty(DEFAULT_AUDIO_SCALE);
-    private static float audioScale = DEFAULT_AUDIO_SCALE;  // dedicated variable for performance reasons
 
     public static volatile int  audioBufferFillSum   = 0;
     public static volatile int  audioBufferFillCount = 0;
-    public static final float[] audioBuffer = new float[VISUAL_BUFFER_SIZE];
+    public static final float[] audioBuffer = new float[VISUAL_AUDIO_BUFFER_SIZE];
     public static int audioBufferSegment = 0;
     public static final XYChart.Series<Number, Number> audioSeries = new XYChart.Series<>();
 
     public static volatile int  executedClocks            = 0;
     public static volatile long lastClockSpeedSampleTime  = System.nanoTime();
     public static final ArrayList<Double> lastClockSpeeds = new ArrayList<>();
-
-    public static void init() {
-        audioScaleProperty.addListener(
-                (obs, oldVal, newVal) -> audioScale = (float) newVal
-        );
-    }
 
     public static float getAudioBufferFillLevel() {
         float average = audioBufferFillSum / ((float) audioBufferFillCount);
@@ -61,7 +54,7 @@ public abstract class DebugData {
         ObservableList<XYChart.Data<Number, Number>> series = audioSeries.getData();
         series.clear();
         for (int s = 0; s < audioBuffer.length; s++) {
-            series.add(new XYChart.Data<>(s, audioBuffer[s] / audioScale));
+            series.add(new XYChart.Data<>(s, audioBuffer[s] / audioScaleProperty.get()));
         }
     }
 }

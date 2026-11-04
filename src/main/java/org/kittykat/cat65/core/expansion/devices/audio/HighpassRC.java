@@ -1,6 +1,6 @@
 package org.kittykat.cat65.core.expansion.devices.audio;
 
-import org.kittykat.cat65.Cat65;
+import org.kittykat.cat65.core.AudioManager;
 
 public class HighpassRC implements AudioFilter {
     private final float alpha;
@@ -8,7 +8,7 @@ public class HighpassRC implements AudioFilter {
     private float prevOutput = 0;
 
     public HighpassRC(float R, float C) {
-        float dt = 1f / Cat65.SAMPLE_RATE;
+        float dt = 1f / AudioManager.SAMPLE_RATE;
         alpha = (R * C) / (R * C + dt);
     }
 

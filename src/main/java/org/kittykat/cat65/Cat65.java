@@ -11,10 +11,6 @@ import org.kittykat.cat65.core.expansion.ExpansionManager;
 public class Cat65 extends Application {
     public static final String RESOURCE_PATH = "/org/kittykat/cat65/";
 
-    public static final int    SAMPLE_RATE = 48_000;
-    public static final double SAMPLE_PERIOD_NANOS = 1_000_000_000d / SAMPLE_RATE;
-    public static final float  SPACING = 8f;
-
     @Override
     public void stop() {
         MainManager.stop();
@@ -26,7 +22,6 @@ public class Cat65 extends Application {
         try {
             ExpansionManager.init();
             ExpansionData.init();
-            DebugData.init();
 
             MainManager.startClockThread();
             AudioManager.startAudioThread();

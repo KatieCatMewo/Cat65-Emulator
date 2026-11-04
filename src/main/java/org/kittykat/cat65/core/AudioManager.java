@@ -1,6 +1,5 @@
 package org.kittykat.cat65.core;
 
-import org.kittykat.cat65.Cat65;
 import org.kittykat.cat65.core.expansion.ExpansionManager;
 
 import javax.sound.sampled.AudioFormat;
@@ -9,6 +8,9 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 
 public abstract class AudioManager {
+    public static final int    SAMPLE_RATE = 48_000;
+    public static final double SAMPLE_PERIOD_NANOS = 1_000_000_000d / SAMPLE_RATE;
+
     public  static final int   READ_BUFFER_SIZE   = 512;
     public  static final int   SAMPLER_BUFFER_SIZE = 4 * READ_BUFFER_SIZE; // probably overkill >w<
     private static final int   AUDIO_BUFFER_SIZE   = 2 * READ_BUFFER_SIZE;
@@ -28,7 +30,7 @@ public abstract class AudioManager {
             int debug_bufferOffset;
 
             try {
-                AudioFormat format = new AudioFormat(Cat65.SAMPLE_RATE, 16, 1, true, false);
+                AudioFormat format = new AudioFormat(SAMPLE_RATE, 16, 1, true, false);
                 SourceDataLine line = AudioSystem.getSourceDataLine(format);
                 line.open(format, LINE_BUFFER_SIZE);
                 line.start();
@@ -68,12 +70,12 @@ public abstract class AudioManager {
 
     public static void clockAudio() {
         sampleTimeAccumulator += ConfigManager.clockPeriodProperty.get();
-        while (sampleTimeAccumulator >= Cat65.SAMPLE_PERIOD_NANOS) {
+        while (sampleTimeAccumulator >= SAMPLE_PERIOD_NANOS) {
             float sample = ExpansionManager.getAudioSample() * (ConfigManager.masterVolumeProperty.get() / 100f);
             filteredSample += FILTER_ALPHA * (sample - filteredSample);
 
             audioSamplerBuffer.write(filteredSample);
-            sampleTimeAccumulator -= Cat65.SAMPLE_PERIOD_NANOS;
+            sampleTimeAccumulator -= SAMPLE_PERIOD_NANOS;
         }
     }
 }
