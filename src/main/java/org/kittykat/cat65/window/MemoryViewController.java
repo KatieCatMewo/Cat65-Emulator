@@ -1,14 +1,17 @@
 package org.kittykat.cat65.window;
 
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.IndexedCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.skin.ListViewSkin;
 import javafx.scene.control.skin.VirtualFlow;
 import org.kittykat.cat65.EmuHelper;
-import org.kittykat.cat65.core.MainManager;
+import org.kittykat.cat65.settings.MemoryRegion;
 
 import java.util.Locale;
 import java.util.logging.Logger;
@@ -18,9 +21,12 @@ public class MemoryViewController extends WindowController {
     private static final double MAX_FONT_SIZE      = 12d;
     private static final double FONT_SIZE_CONSTANT = MAX_FONT_SIZE / 550d;
 
-    @FXML
-    @SuppressWarnings("unused")
-    private ListView<String> memView;
+    private static final MemoryRegion DEFAULT_MEMORY_REGION = MemoryRegion.CPU_Memory;
+    private final ObjectProperty<MemoryRegion> memoryRegionProperty = new SimpleObjectProperty<>(DEFAULT_MEMORY_REGION);
+    private MemoryRegion memoryRegion = memoryRegionProperty.get();
+    @FXML private ComboBox<MemoryRegion> cbx_memoryRegion;
+
+    @FXML private ListView<String> memView;
     private final ObservableList<String> lines = FXCollections.observableArrayList();
 
     /*
@@ -34,16 +40,39 @@ public class MemoryViewController extends WindowController {
     }
 
     public MemoryViewController() {
-        super("%s [CPU]".formatted(WINDOW_NAME), "memory-viewer");
+        super("%s [%s]".formatted(WINDOW_NAME, DEFAULT_MEMORY_REGION.getName()), "memory-viewer");
 
+        EmuHelper.setupComboBox(cbx_memoryRegion, memoryRegionProperty, MemoryRegion.class, MemoryRegion.stringConverter);
+        memoryRegionProperty.addListener((obs, oldVal, newVal) -> {
+            memoryRegion = newVal;
+            window.setTitle("%s [%s]".formatted(WINDOW_NAME, memoryRegion.getName()));
+            setupVisualizer();
+        });
         memView.setItems(lines);
-        for (int l = 0x000; l <= 0xfff; l++) {
-            lines.add(getVisualizerLine(l));
-        }
+        setupVisualizer();
+
         memView.widthProperty().addListener((obs, oldWidth, newWidth) -> updateFontSize(newWidth.doubleValue()));
         updateFontSize(memView.getWidth());
     }
 
+    private void setupVisualizer() {
+        int currentLen = lines.size();
+        int newLen = memoryRegion.lineCount;
+
+        int min = Math.min(currentLen, newLen);
+        int max = Math.max(currentLen, newLen);
+
+        for (int l = 0x00; l < (min - 1); l++) {
+            updateVisualizerLine(l);
+        }
+        if (currentLen > newLen) {
+            lines.remove(min, currentLen);
+        } else if (currentLen < newLen) {
+            for (int l = 0x000; l < newLen; l++) {
+                lines.add(getVisualizerLine(l));
+            }
+        }
+    }
     private void updateFontSize(double width) {
         double newSize = Math.min(MAX_FONT_SIZE, width * FONT_SIZE_CONSTANT);
         memView.setStyle(String.format(Locale.ROOT, "-fx-font-size: %.3f;", newSize));
@@ -54,7 +83,7 @@ public class MemoryViewController extends WindowController {
         StringBuilder hex = new StringBuilder("$%04x:".formatted(address));
         StringBuilder ascii = new StringBuilder("  |  ");
         for (int a = 0; a < 16; a++) {
-            int b = MainManager.get(address + a, false);
+            int b = memoryRegion.read(address + a);
             hex.append("%s %02x".formatted((a == 8) ? " " : "", b));
             char chr = EmuHelper.convertToASCII(b);
             ascii.append("%s%c".formatted((a == 8) ? " " : "", chr));

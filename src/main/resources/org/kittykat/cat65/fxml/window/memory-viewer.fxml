@@ -6,8 +6,9 @@
 <VBox id="root" prefHeight="750.0" prefWidth="560.0" stylesheets="@../../css/style.css"
       xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1">
     <VBox styleClass="container" spacing="5" VBox.vgrow="ALWAYS">
-        <HBox styleClass="box">
-            <Label text="Memory Region: " />
+        <HBox spacing="8" styleClass="box">
+            <Label text="Memory Region:" />
+            <ComboBox fx:id="cbx_memoryRegion" prefWidth="150.0" />
         </HBox>
         <ListView fx:id="memView" cache="true" cacheHint="SPEED" VBox.vgrow="ALWAYS" />
     </VBox>

@@ -199,7 +199,7 @@ public class VideoCard extends ExpansionDevice {
     }
     private void getTileLayer(int layer) {
         int address = (tilemapBank << 13) | (nextTile << 5) | (layer << 3) | nextLineY;
-        preloadedLayers[layer] = readTile(address);
+        preloadedLayers[layer] = ExpansionData.readTilesetByte(address);
     }
     private void transferLayers() {
         if (shouldPreload()) {
@@ -230,9 +230,6 @@ public class VideoCard extends ExpansionDevice {
 
     private int readVRAM(int address) {
         return (((ctrl & 0b0000_1000) == 0) ? vram00[address] : vram01[address]) & 0xff;
-    }
-    private int readTile(int address) {
-        return ExpansionData.tilesetROM[address] & 0xff;
     }
 
     public boolean shouldPreload() {

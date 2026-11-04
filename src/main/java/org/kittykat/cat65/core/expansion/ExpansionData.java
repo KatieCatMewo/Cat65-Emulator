@@ -54,6 +54,10 @@ public abstract class ExpansionData {
         return index;
     }
 
+    public static int readTilesetByte(int address) {
+        return tilesetROM[address] & 0xff;
+    }
+
     public static int getColor(int address) {
         return 0xff_000000 | (readRed(address) << 16) | (readGreen(address) << 8) | readBlue(address);
     }
