@@ -14,23 +14,18 @@ public abstract class ExpansionData {
     public static final byte[] colorG = new byte[COLOR_ROM_SIZE];
     public static final byte[] colorB = new byte[COLOR_ROM_SIZE];
 
-    @SuppressWarnings("CallToPrintStackTrace")
     public static void init() {
+        loadColormap("red",   colorR);
+        loadColormap("green", colorG);
+        loadColormap("blue",  colorB);
+    }
+    @SuppressWarnings("CallToPrintStackTrace")
+    private static void loadColormap(String file, byte[] array) {
         try {
-            byte[] fileR = EmuHelper.readResourceFile("colormap/red.rom");
-            byte[] fileG = EmuHelper.readResourceFile("colormap/green.rom");
-            byte[] fileB = EmuHelper.readResourceFile("colormap/blue.rom");
-            int rLen = fileR.length;
-            int gLen = fileG.length;
-            int bLen = fileB.length;
-
-            for (int c = 0; c < COLOR_ROM_SIZE; c++) {
-                if (c < rLen) colorR[c] = fileR[c];
-                if (c < gLen) colorG[c] = fileG[c];
-                if (c < bLen) colorB[c] = fileB[c];
-            }
+            byte[] data = EmuHelper.readResourceFile("colormap/%s.rom".formatted(file));
+            System.arraycopy(data, 0, array, 0, Math.min(data.length, array.length));
         } catch (Exception e) {
-            System.err.println("[!] Could not load colormap ROMs!");
+            System.err.printf("[!] Could not load %s colormap ROM!\n", file);
             e.printStackTrace();
         }
     }
