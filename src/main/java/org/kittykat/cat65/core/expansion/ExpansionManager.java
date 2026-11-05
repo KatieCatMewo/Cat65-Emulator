@@ -21,9 +21,11 @@ public abstract class ExpansionManager {
     }
 
     private static void setEx04(ExpansionPort device) {
+        ex04.forceCloseWindow();
         ex04 = getDevice(device);
     }
     private static void setEx07(ExpansionPort device) {
+        ex07.forceCloseWindow();
         ex07 = getDevice(device);
     }
     private static ExpansionDevice getDevice(ExpansionPort device) {

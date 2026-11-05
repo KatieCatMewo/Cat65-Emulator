@@ -58,4 +58,10 @@ public abstract class ExpansionDevice extends ExtraChip {
             windowController = null;
         }
     }
+
+    public void forceCloseWindow() {
+        if (windowController != null) {
+            windowController.getWindow().close();
+        }
+    }
 }
