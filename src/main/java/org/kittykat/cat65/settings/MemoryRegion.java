@@ -13,7 +13,7 @@ public enum MemoryRegion {
     System_RAM     (0x400,  a -> get(a,          false)),
     Expansion_4    (0x100,  a -> get(a + 0x4000, false)),
     Expansion_7    (0x100,  a -> get(a + 0x7000, false)),
-    Exp_Tileset_ROM(0x200, ExpansionData::readTilesetByte);
+    Exp_Tileset_ROM(0x1000, ExpansionData::readTilesetByte);
 
     public final int lineCount;
     private final Function<Integer, Integer> getter;

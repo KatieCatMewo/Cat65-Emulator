@@ -43,15 +43,15 @@ public class ConfigWindowController extends WindowController {
             case "expansion" -> 2;
             case "video"     -> 3;
             case "audio"     -> 4;
-            default -> throw new RuntimeException("Config tab %s does not exist".formatted(tab));
+            default -> throw new RuntimeException("Config tab \"%s\" does not exist".formatted(tab));
         };
     }
 
     private void initGeneralTab() {
-        EmuHelper.setupIntSpinner(spn_clock, MIN_CLOCK_PERIOD, MAX_CLOCK_PERIOD, DEFAULT_CLOCK_PERIOD, 1);
+        EmuHelper.setupIntSpinner(spn_clock, MIN_CLOCK_PERIOD, MAX_CLOCK_PERIOD, clockPeriod, 1);
         EmuHelper.bindSpinner(spn_clock, clockPeriodProperty);
         spn_clock.valueProperty().addListener((obs, oldVal, newVal) -> updateFrequencyLabel(newVal));
-        updateFrequencyLabel(clockPeriodProperty.get());
+        updateFrequencyLabel(clockPeriod);
     }
     private void initSerialTab() {
         EmuHelper.setupComboBox(cbx_newLineMode, terminalNewLineVariant, NewLineVariant.class, NewLineVariant.stringConverter);

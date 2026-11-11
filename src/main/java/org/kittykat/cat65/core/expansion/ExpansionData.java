@@ -2,6 +2,8 @@ package org.kittykat.cat65.core.expansion;
 
 import org.kittykat.cat65.EmuHelper;
 
+import java.util.Arrays;
+
 public abstract class ExpansionData {
     public static final int MAX_TILESETS = 8;
     public static final int TILESET_SIZE = 0x2000;
@@ -30,6 +32,9 @@ public abstract class ExpansionData {
         }
     }
 
+    public static void resetData() {
+        Arrays.fill(tilesetROM, (byte) 0x00);
+    }
     public static int loadC65(byte[] file, int index) {
         if (index < file.length) {
             System.out.println("[*] loading tilesets...");

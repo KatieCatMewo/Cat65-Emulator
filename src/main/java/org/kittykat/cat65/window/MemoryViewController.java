@@ -60,17 +60,15 @@ public class MemoryViewController extends WindowController {
         int newLen = memoryRegion.lineCount;
 
         int min = Math.min(currentLen, newLen);
-        int max = Math.max(currentLen, newLen);
 
-        for (int l = 0x00; l < (min - 1); l++) {
+        if (currentLen > newLen) {
+            lines.remove(newLen, currentLen);
+        }
+        for (int l = 0; l < min; l++) {
             updateVisualizerLine(l);
         }
-        if (currentLen > newLen) {
-            lines.remove(min, currentLen);
-        } else if (currentLen < newLen) {
-            for (int l = 0x000; l < newLen; l++) {
-                lines.add(getVisualizerLine(l));
-            }
+        for (int l = currentLen; l < newLen; l++) {
+            lines.add(getVisualizerLine(l));
         }
     }
     private void updateFontSize(double width) {
@@ -103,7 +101,7 @@ public class MemoryViewController extends WindowController {
         if (firstCell == null) return;
 
         int first = Math.max(0x000, firstCell.getIndex());
-        int last  = Math.min(0xfff, flow.getLastVisibleCell().getIndex());
+        int last  = Math.min(lines.size() - 1, flow.getLastVisibleCell().getIndex());
 
         for (int line = first; line <= last; line++) {
             updateVisualizerLine(line);

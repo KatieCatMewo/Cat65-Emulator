@@ -49,7 +49,7 @@ public class MainWindowController extends WindowManager {
         );
     }
     private void initClockSpinner() {
-        EmuHelper.setupIntSpinner(spn_clock, MIN_CLOCK_PERIOD, MAX_CLOCK_PERIOD, clockPeriodProperty.get(), 1);
+        EmuHelper.setupIntSpinner(spn_clock, MIN_CLOCK_PERIOD, MAX_CLOCK_PERIOD, clockPeriod, 1);
         EmuHelper.bindSpinner(spn_clock, clockPeriodProperty);
         spn_clock.valueProperty().addListener((obs, oldVal, newVal) ->
                 lbl_targetFrequency.setText("(%s)".formatted(EmuHelper.formatFrequency(1_000_000_000d / newVal)))
@@ -130,7 +130,7 @@ public class MainWindowController extends WindowManager {
         File file = romChooser.showOpenDialog(getWindow().getStage());
         if (file != null) {
             romDir = file.getParentFile();
-            MainManager.loadROM(file);
+            MainManager.loadFile(file);
         }
     }
 

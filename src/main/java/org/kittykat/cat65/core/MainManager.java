@@ -14,9 +14,12 @@ import org.kittykat.cat65.window.MainWindowController;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.concurrent.locks.LockSupport;
 
 public abstract class MainManager {
+    private static final int MAX_FILE_SIZE = 0x4_000;  // 256 KiB
     private static final int HEADER_SIZE = 16;
     private static final char[] ID_CHARS = {'c', '6', '5', 0x15};
 
@@ -186,12 +189,21 @@ public abstract class MainManager {
     }
 
     @SuppressWarnings("CallToPrintStackTrace")
-    public static void loadROM(File file) {
+    public static void loadFile(File file) {
         boolean p = paused;
         paused = true;
+
+        Arrays.fill(rom, (byte) 0x00);
+        ExpansionData.resetData();
+
         try {
             System.out.println();
-            byte[] data = Files.readAllBytes(file.toPath());
+
+            Path path = file.toPath();
+            if (Files.size(path) > MAX_FILE_SIZE) {
+                System.err.printf("[!] Selected file is larger than the maximum file size of %d bytes!\n", MAX_FILE_SIZE);
+            }
+            byte[] data = Files.readAllBytes(path);
 
             boolean c65 = true;
             for (int i = 0; i < 4; i++) {

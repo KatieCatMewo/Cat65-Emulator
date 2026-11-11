@@ -15,21 +15,24 @@ public abstract class DebugData {
     public  static final float DEFAULT_AUDIO_SCALE = MIN_AUDIO_SCALE;
     public  static final FloatProperty audioScaleProperty = new SimpleFloatProperty(DEFAULT_AUDIO_SCALE);
 
-    public static volatile int  audioBufferFillSum   = 0;
-    public static volatile int  audioBufferFillCount = 0;
-    public static final float[] audioBuffer = new float[VISUAL_AUDIO_BUFFER_SIZE];
-    public static int audioBufferSegment = 0;
-    public static final XYChart.Series<Number, Number> audioSeries = new XYChart.Series<>();
+    public  static volatile int  audioBufferFillSum   = 0;
+    public  static volatile int  audioBufferFillCount = 0;
+    private static float lastAudioBufferFillLevel = 0f;
+    public  static final float[] audioBuffer = new float[VISUAL_AUDIO_BUFFER_SIZE];
+    public  static int audioBufferSegment = 0;
+    public  static final XYChart.Series<Number, Number> audioSeries = new XYChart.Series<>();
 
     public static volatile int  executedClocks            = 0;
     public static volatile long lastClockSpeedSampleTime  = System.nanoTime();
     public static final ArrayList<Double> lastClockSpeeds = new ArrayList<>();
 
     public static float getAudioBufferFillLevel() {
-        float average = audioBufferFillSum / ((float) audioBufferFillCount);
-        audioBufferFillSum   = 0;
+        int sum = audioBufferFillSum;
+        int count = audioBufferFillCount;
+        audioBufferFillSum = 0;
         audioBufferFillCount = 0;
-        return average;
+        if (count != 0) lastAudioBufferFillLevel = sum / ((float) count);
+        return lastAudioBufferFillLevel;
     }
     public static double getCurrentClockSpeed() {
         long   now         = System.nanoTime();

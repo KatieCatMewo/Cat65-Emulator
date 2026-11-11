@@ -5,8 +5,6 @@ import org.kittykat.cat65.core.expansion.devices.audio.HighpassRC;
 import org.kittykat.cat65.window.AudioChannelController;
 import org.kittykat.cat65.window.WindowController;
 
-import java.util.Arrays;
-
 public class AudioCard extends AudioExpansion {
     public static final int[] NOISE_FREQ_VALUES = {
             0b1111_1111_1011, 0b1111_1111_0111, 0b1111_1110_1111, 0b1111_1101_1111,
@@ -33,12 +31,11 @@ public class AudioCard extends AudioExpansion {
 
     private final HighpassRC filter = new HighpassRC(10_000f, 2.2e-6f); // 10kOhm, 2.2µF
 
-    public boolean masterEnable  = true;
-    public final boolean[] channelStates = new boolean[CHANNEL_COUNT];
+    public volatile boolean masterEnable  = true;
+    public volatile int channelStates = 0b1111_1111;
 
     public AudioCard() {
         super(0b0000_0000_1111);
-        Arrays.fill(channelStates, true);
     }
 
     @Override
@@ -88,7 +85,7 @@ public class AudioCard extends AudioExpansion {
     }
 
     private boolean isChannelEnabled(int c) {
-        return masterEnable & channelStates[c];
+        return masterEnable && (((channelStates >> c) & 0b1) != 0);
     }
 
     @Override

@@ -7,7 +7,6 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import org.kittykat.cat65.Cat65;
 import org.kittykat.cat65.EmuHelper;
 import org.kittykat.cat65.core.ConfigManager;
 import org.kittykat.cat65.core.MainManager;
@@ -28,6 +27,7 @@ public class AudioChannelController extends WindowController {
         window.getStage().setResizable(false);
         ObservableList<Node> children = channelView.getChildren();
 
+        check_master.setSelected(audioCard.masterEnable);
         check_master.setOnAction(event -> {
             audioCard.masterEnable = check_master.isSelected();
             ObservableList<Node> c = channelView.getChildren();
@@ -42,17 +42,28 @@ public class AudioChannelController extends WindowController {
         for (int c = 0; c < CHANNEL_NAMES.length; c++) {
             Label lbl_reg = new Label();
             lbl_reg.getStyleClass().add("register");
-
-            final int channel = c;
-            CheckBox channelEnable = new CheckBox();
-            channelEnable.setSelected(true);
-            channelEnable.setOnAction(event -> {
-                boolean enabled = channelEnable.isSelected();
-                audioCard.channelStates[channel] = enabled;
-                lbl_reg.setDisable(!enabled);
-            });
-            children.add(new HBox(8d, lbl_reg, channelEnable));
+            HBox hBox = new HBox(8d, lbl_reg, setupEnableCheckbox(audioCard, c, lbl_reg));
+            hBox.setDisable(!audioCard.masterEnable);
+            children.add(hBox);
         }
+    }
+
+    @SuppressWarnings("NonAtomicOperationOnVolatileField")
+    private static CheckBox setupEnableCheckbox(AudioCard audioCard, int channel, Label lbl_reg) {
+        CheckBox channelEnable = new CheckBox();
+        channelEnable.setSelected(((audioCard.channelStates >> channel) & 0b1) != 0);
+        channelEnable.setOnAction(event -> {
+            boolean enabled = channelEnable.isSelected();
+
+            int mask = 0b1 << channel;
+            if (enabled) {
+                audioCard.channelStates |= mask;
+            } else {
+                audioCard.channelStates &= ~mask;
+            }
+            lbl_reg.setDisable(!enabled);
+        });
+        return channelEnable;
     }
 
     @FXML
