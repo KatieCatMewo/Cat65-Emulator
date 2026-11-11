@@ -19,7 +19,7 @@ import java.util.Arrays;
 import java.util.concurrent.locks.LockSupport;
 
 public abstract class MainManager {
-    private static final int MAX_FILE_SIZE = 0x4_000;  // 256 KiB
+    private static final int MAX_FILE_SIZE = 0x40_000;  // 256 KiB
     private static final int HEADER_SIZE = 16;
     private static final char[] ID_CHARS = {'c', '6', '5', 0x15};
 
@@ -81,7 +81,6 @@ public abstract class MainManager {
             long timeAccumulator = 0L;
             long currentTime;
             long sleepTime;
-            int clockPeriod;
 
             while (running) {
                 currentTime = System.nanoTime();
@@ -204,6 +203,7 @@ public abstract class MainManager {
             Path path = file.toPath();
             if (Files.size(path) > MAX_FILE_SIZE) {
                 System.err.printf("[!] Selected file is larger than the maximum file size of %d bytes!\n", MAX_FILE_SIZE);
+                return;
             }
             byte[] data = Files.readAllBytes(path);
 
