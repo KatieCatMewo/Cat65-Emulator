@@ -5,6 +5,8 @@ import org.kittykat.cat65.core.expansion.devices.audio.HighpassRC;
 import org.kittykat.cat65.window.AudioChannelController;
 import org.kittykat.cat65.window.WindowController;
 
+import java.util.Arrays;
+
 public class AudioCard extends AudioExpansion {
     public static final int[] NOISE_FREQ_VALUES = {
             0b1111_1111_1011, 0b1111_1111_0111, 0b1111_1110_1111, 0b1111_1101_1111,
@@ -31,7 +33,7 @@ public class AudioCard extends AudioExpansion {
 
     private final HighpassRC filter = new HighpassRC(10_000f, 2.2e-6f); // 10kOhm, 2.2µF
 
-    public volatile boolean masterEnable  = true;
+    public volatile boolean masterEnable = true;
     public volatile int channelStates = 0b1111_1111;
 
     public AudioCard() {
@@ -144,7 +146,7 @@ public class AudioCard extends AudioExpansion {
         return ((ctrl & (0b1000_0000_0000 >> t)) != 0) ? 0xf : 0x0;
     }
     public int[] getVolumeLevels() {
-        int[] levels = new int[8];
+        int[] levels = new int[CHANNEL_COUNT];
         levels[0] = noiseVol;
         levels[1] = getTriVolume(0);
         levels[2] = getTriVolume(1);
@@ -152,7 +154,7 @@ public class AudioCard extends AudioExpansion {
         return levels;
     }
     public int[] getFrequencies() {
-        int[] freq = new int[8];
+        int[] freq = new int[CHANNEL_COUNT];
         freq[0] = noiseFreq;
         freq[1] = tri01Freq;
         freq[2] = tri02Freq;
@@ -160,21 +162,22 @@ public class AudioCard extends AudioExpansion {
         return freq;
     }
     public int[] getCounters() {
-        int[] counters = new int[8];
+        int[] counters = new int[CHANNEL_COUNT];
         counters[0] = noiseCounter;
         System.arraycopy(triCounters, 0, counters, 1, triCounters.length);
         System.arraycopy(pulseCounters, 0, counters, 3, pulseCounters.length);
         return counters;
     }
     public int[] getStates() {
-        int[] states = new int[8];
+        int[] states = new int[CHANNEL_COUNT];
         states[0] = (noiseLFSR & 0xffff);
         System.arraycopy(triStates, 0, states, 1, triStates.length);
         System.arraycopy(pulseStates, 0, states, 3, pulseStates.length);
         return states;
     }
     public int[] getDutyCycles() {
-        int[] duty = new int[]{-1, -1, -1, 0, 0, 0, 0, 0};
+        int[] duty = new int[CHANNEL_COUNT];
+        Arrays.fill(duty, -1);
         for (int p = 0; p < pulseStates.length; p++) {
             duty[3 + p] = (ctrl >> (8 - (2 * p))) & 0b11;
         }
