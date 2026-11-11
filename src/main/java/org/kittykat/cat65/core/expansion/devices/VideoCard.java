@@ -223,13 +223,16 @@ public class VideoCard extends ExpansionDevice {
                     paletteAddress |= layerRegisters[l] & 0x80;
                 }
                 paletteAddress = (paletteAddress >> 4) | 0x780;
-                outputColor = ExpansionData.getColor(readVRAM(paletteAddress) | (colormapBank << 8));
+                outputColor = getOutputColor(readVRAM(paletteAddress));
             }
         }
     }
 
     private int readVRAM(int address) {
         return (((ctrl & 0b0000_1000) == 0) ? vram00[address] : vram01[address]) & 0xff;
+    }
+    public int getOutputColor(int paletteValue) {
+        return ExpansionData.getColor(paletteValue | (colormapBank << 8));
     }
 
     public boolean shouldPreload() {
@@ -269,5 +272,12 @@ public class VideoCard extends ExpansionDevice {
     @Override
     protected WindowController makeWindow() {
         return new VideoCardWindowController(this);
+    }
+
+    public int getColormapBank() {
+        return colormapBank;
+    }
+    public int getPaletteValue(int i) {
+        return readVRAM(0x780 + i);
     }
 }

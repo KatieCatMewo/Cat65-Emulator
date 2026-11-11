@@ -22,4 +22,9 @@ public abstract class WindowController {
     public Window getWindow() {
         return window;
     }
+
+    @Override
+    public String toString() {
+        return "%s (%s)".formatted(window.getStage().getTitle(), super.toString());
+    }
 }

@@ -10,6 +10,9 @@
         <Menu mnemonicParsing="false" text="Video">
             <MenuItem mnemonicParsing="false" onAction="#openVideoConfig" text="Preferences" />
         </Menu>
+        <Menu mnemonicParsing="false" text="Debug">
+            <MenuItem mnemonicParsing="false" onAction="#viewPalette" text="Palette Viewer" />
+        </Menu>
         <Menu mnemonicParsing="false" text="Help">
             <MenuItem mnemonicParsing="false" text="Help" />
         </Menu>

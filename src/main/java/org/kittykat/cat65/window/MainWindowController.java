@@ -12,14 +12,12 @@ import org.kittykat.cat65.core.DebugData;
 import org.kittykat.cat65.core.expansion.ExpansionManager;
 
 import java.io.File;
-import java.util.ArrayList;
 
 import static org.kittykat.cat65.core.ConfigManager.*;
 
-public class MainWindowController extends WindowController {
+public class MainWindowController extends WindowManager {
     private static final String WINDOW_NAME = "Cat65 Emulator";
 
-    private final ArrayList<WindowController> windows = new ArrayList<>();
     public SerialTerminalController terminal = null;
 
     private final FileChooser romChooser = new FileChooser();
@@ -73,9 +71,6 @@ public class MainWindowController extends WindowController {
                 synchronized (windows) {
                     DebugData.uiUpdate();
                     ExpansionManager.updateWindows();
-                    for (WindowController wc : windows) {
-                        wc.updateWindow();
-                    }
                     updateWindow();
                 }
             }
@@ -85,6 +80,8 @@ public class MainWindowController extends WindowController {
 
     @Override
     public void updateWindow() {
+        super.updateWindow();
+
         double target = ConfigManager.getTargetClockSpeed();
         double current = DebugData.getCurrentClockSpeed();
         String unit = "Hz";
@@ -98,15 +95,9 @@ public class MainWindowController extends WindowController {
         lbl_currentFrequency.setText("(Current: %.2f %s)".formatted(current, unit));
     }
 
-    public void openWindow(WindowController window) {
-        synchronized (windows) {
-            windows.add(window);
-        }
-    }
+    @Override
     public void closeWindow(WindowController window) {
-        synchronized (windows) {
-            windows.remove(window);
-        }
+        super.closeWindow(window);
         ExpansionManager.closeWindow(window);
         if (window == terminal) {
             terminal = null;
@@ -116,9 +107,7 @@ public class MainWindowController extends WindowController {
     @FXML
     @Override
     public void onClose() {
-        for (int w = windows.size() - 1; w >= 0; w--) {
-            windows.get(w).window.close();
-        }
+        super.onClose();
         MainManager.stop();
     }
 
