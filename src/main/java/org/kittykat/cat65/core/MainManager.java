@@ -54,6 +54,7 @@ public abstract class MainManager {
 
     public static MainWindowController mainWindowController;
 
+    private static final long MAX_LAG_BUFFER = 50_000_000L;  // 50 ms
     private static long timeSinceLastClock = System.nanoTime();
 
     public static volatile boolean running = true;
@@ -88,6 +89,7 @@ public abstract class MainManager {
                 lastTime = currentTime;
 
                 timeAccumulator += timeSinceLastClock;
+                timeAccumulator = Math.min(timeAccumulator, MAX_LAG_BUFFER + ConfigManager.clockPeriod);
 
                 while (timeAccumulator >= ConfigManager.clockPeriod) {
                     if (!paused || step) {
