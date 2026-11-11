@@ -10,8 +10,8 @@ public class CPUInterruptTests extends CPUTest {
         loadVector(VEC_IRQ, 0x0300);
         loadProgram(
                 0x58,  // cli
-                    0xf8,  // sed
-                    0x00, 0xea  // brk + padding byte
+                0xf8,  // sed
+                0x00, 0xea  // brk + padding byte
         );
 
         stepInstructions(2);  // cli + sed
@@ -158,6 +158,81 @@ public class CPUInterruptTests extends CPUTest {
                 // bit 5 and 'B' are ignored by this test
                 () -> assertEquals(0xcf, cpu.getP() & 0xcf, "RTI should correctly set the status flags")
         );
+    }
+
+    @Test
+    public void testDelayedInterruptSEI() {
+        loadVector(VEC_IRQ, 0x0300);
+        loadProgram(
+                0x58,  // cli
+                0x78,  // sei
+                0xea  // nop
+        );
+
+        stepInstructions(2);  // cli + sei
+        bus.irq = true;
+
+        stepInstruction();  // IRQ
+        assertEquals(0x0300, cpu.getPC(), "SEI should effectively set the 'I' flag one instruction too late\n" +
+                                          "causing the interrupt to still happen immediately after the SEI");
+    }
+    @Test
+    public void testDelayedInterruptCLI() {
+        loadVector(VEC_IRQ, 0x0300);
+        loadProgram(
+                0x58,  // cli
+                0xea,  // nop
+                0xea  // nop
+        );
+
+        bus.irq = true;
+        stepInstruction();  // cli
+
+        stepInstruction();  // nop
+        assertEquals(0x0202, cpu.getPC(), "CLI should effectively clear the 'I' flag one instruction too late");
+
+        stepInstruction();  // IRQ
+        assertEquals(0x0300, cpu.getPC(), "the flag-delay from CLI should only delay the IRQ by one instruction");
+    }
+
+    @Test
+    public void testDelayedInterruptPLP() {
+        loadVector(VEC_IRQ, 0x0300);
+        loadProgram(
+                0x28,  // plp
+                0xea,  // nop
+                0xea  // nop
+        );
+        loadStack(0x00);
+
+        bus.irq = true;
+        stepInstruction();  // plp
+
+        stepInstruction();  // nop
+        assertEquals(0x0202, cpu.getPC(), "PLP should effectively write the 'I' flag one instruction too late");
+
+        stepInstruction();  // IRQ
+        assertEquals(0x0300, cpu.getPC(), "the flag-delay from PLP should only delay the IRQ by one instruction");
+    }
+
+    @Test
+    public void testDelayedInterruptRTI() {
+        loadVector(VEC_IRQ, 0x0300);
+        loadProgram(
+                0x58,  // cli
+                0x40  // rti
+        );
+        load(0x0280, 0xea);  // nop (safety)
+        loadStack(
+                0xff,  // status
+                0x80, 0x02  // return address
+        );
+
+        stepInstructions(2);  // cli + rti
+        bus.irq = true;
+
+        stepInstruction();  // nop
+        assertEquals(0x0281, cpu.getPC(), "RTI should not have a flag-delay like other instructions that modify the 'I' flag");
     }
 
     @Test

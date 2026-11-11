@@ -58,13 +58,6 @@ public abstract class EmuHelper {
         return c;
     }
 
-    public static int fromBCD(int v) {
-        return (v & 0x0f) + (((v & 0xf0) >> 4) * 10);
-    }
-    public static int toBCD(int v) {
-        return (v % 10) + ((v / 10) << 4);
-    }
-
     public static int boolBit(boolean b) {
         return b ? 1 : 0;
     }

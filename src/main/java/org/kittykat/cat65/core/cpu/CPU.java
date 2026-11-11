@@ -357,6 +357,7 @@ public class CPU {
     private int mdr = 0x00;
 
     private boolean lastNMI = false;
+    private boolean shouldHandleIRQ = false;
 
     private int     cycles = 0;
     private boolean wait   = false;
@@ -393,17 +394,28 @@ public class CPU {
                     wait = false;
                 }
 
+                boolean interrupted = false;
                 if (pollNMI()) {
                     // NMIs have priority
                     wait = false;
                     hardwareInterrupt(1);
-                } else if (irq & (!getFlag('I'))) {
+                    interrupted = true;
+                } else if (irq & shouldHandleIRQ) {
                     hardwareInterrupt(2);
-                } else if (!wait) {
-                    int opcode = nextByte();
-                    Opcode op = opcodes[opcode];
-                    cycles = op.cycles;
-                    op.execute();
+                    interrupted = true;
+                }
+                // instructions like SEI, CLI and PLP effectively set the 'I' flag one instruction too late
+                // meaning that IRQs can happen after an SEI, for example
+                // or if an IRQ is pending during a CLI, it still executes the next instruction before interrupting
+                updateHandleIrqFlag();
+
+                if (!interrupted) {
+                    if (!wait) {
+                        int opcode = nextByte();
+                        Opcode op = opcodes[opcode];
+                        cycles = op.cycles;
+                        op.execute();
+                    }
                 }
             }
         }
@@ -446,6 +458,9 @@ public class CPU {
         lastNMI = bus.getNMI();
     }
 
+    private void updateHandleIrqFlag() {
+        shouldHandleIRQ = !getFlag('I');
+    }
     private boolean pollNMI() {
         boolean currentNMI = bus.getNMI();
         boolean nmi = lastNMI && !currentNMI;
@@ -677,22 +692,27 @@ public class CPU {
 
     private void ADC(OpcodeContext c) {
         int carry = EmuHelper.boolBit(getFlag('C'));
-        int v1 = A;
-        int b = v1 + c.input + carry;
+        int reg = A;
+        int bin = reg + c.input + carry;
         if (getFlag('D')) {  // decimal mode
-            int d1 = EmuHelper.fromBCD(v1);
-            int d2 = EmuHelper.fromBCD(c.input);
-            int r = d1 + d2 + carry;
-            A = EmuHelper.toBCD(r % 100) & 0xff;
-            writeFlag('C', r > 99);
+            // https://6502.org/tutorials/decimal_mode.html#A
+            int low = (reg & 0x0f) + (c.input & 0x0f) + carry;
+            if (low >= 0x0a)
+                low = ((low + 0x06) & 0x0f) | 0x10;
+            int r = (A & 0xf0) + (c.input & 0xf0) + low;
+            if (r >= 0xa0)
+                r += 0x60;
+
+            A = r & 0xff;
+            writeFlag('C', r >= 0x100);
             
             cycles++;  // on the 65c02 BCD math takes an extra cycle
         } else {
-            A = b & 0xff;
-            writeFlag('C', b > 0xff);
+            A = bin & 0xff;
+            writeFlag('C', bin > 0xff);
         }
         flagsZN(A);
-        writeFlag('V', (~(v1 ^ c.input) & (v1 ^ b) & 0x80) != 0);
+        writeFlag('V', (~(reg ^ c.input) & (reg ^ bin) & 0x80) != 0);
     }
     private void AND(OpcodeContext c) {
         A &= c.input;
@@ -918,6 +938,11 @@ public class CPU {
     private void RTI(OpcodeContext c) {
         P  = (stackPull() & 0b1100_1111);  // bit 5 and the B flag get ignored by RTI
         PC = stackPullWord();
+
+        // because RTI pulls the status register before the second-to-last instruction cycle
+        // it is the only instruction that modifies the 'I' flag before IRQs are polled,
+        // meaning that it does *not* have the same flag-delay as SEI, CLI and PLP
+        updateHandleIrqFlag();
     }
     private void RTS(OpcodeContext c) {
         PC = (stackPullWord() + 1) & 0xffff;
@@ -927,22 +952,27 @@ public class CPU {
         setFlag(c.args.charAt(0));
     }
     private void SBC(OpcodeContext c) {
-        int carry = EmuHelper.boolBit(!getFlag('C'));
-        int v1 = A;
-        int b = v1 - c.input - carry;
+        int borrow = EmuHelper.boolBit(!getFlag('C'));
+        int reg = A;
+        int bin = reg - c.input - borrow;
         if (getFlag('D')) {  // decimal mode
-            int d1 = EmuHelper.fromBCD(v1);
-            int d2 = EmuHelper.fromBCD(c.input);
-            int r = d1 - d2 - carry;
-            A = EmuHelper.toBCD(Math.floorMod(100 + r, 100)) & 0xff;
+            // https://6502.org/tutorials/decimal_mode.html#A
+            int low = (A & 0x0f) - (c.input & 0x0f) - borrow;
+            if (low < 0)
+                low = ((low - 0x06) & 0x0f) - 0x10;
+            int r = (A & 0xf0) - (c.input & 0xf0) + low;
+            if (r < 0)
+                r -= 0x60;
+
+            A = r & 0xff;
 
             cycles++;  // on the 65c02 BCD math takes an extra cycle
         } else {
-            A = b & 0xff;
+            A = bin & 0xff;
         }
-        writeFlag('C', b >= 0x00);
+        writeFlag('C', bin >= 0x00);
         flagsZN(A);
-        writeFlag('V', ((v1 ^ c.input) & (v1 ^ b) & 0x80) != 0);
+        writeFlag('V', ((reg ^ c.input) & (reg ^ bin) & 0x80) != 0);
     }
     private void STA(OpcodeContext c) {
         write(c.input, A);
@@ -1030,7 +1060,7 @@ public class CPU {
         CMP(c);
     }
     private void ISC(OpcodeContext c) {  // (ISB, INS)
-        DEC(c);
+        INC(c);
         c.input = read(c.input);
         SBC(c);
     }
@@ -1055,7 +1085,7 @@ public class CPU {
     private void RRA(OpcodeContext c) {
         ROR(c);
         c.input = read(c.input);
-        AND(c);
+        ADC(c);
     }
     private void SAX(OpcodeContext c) {  // (AXS, AAX)
         int r = A & X;
