@@ -38,4 +38,9 @@ public abstract class DebugChart extends LineChart<Number, Number> {
     protected static void addPoint(ObservableList<XYChart.Data<Number, Number>> series, int x, double y) {
         series.add(new XYChart.Data<>(x, y));
     }
+
+    protected void disableAutoRanging() {
+        getXAxis().setAutoRanging(false);
+        getYAxis().setAutoRanging(false);
+    }
 }

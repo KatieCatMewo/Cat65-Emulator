@@ -68,7 +68,6 @@ public abstract class EmuHelper {
 
     public static NumberAxis makeNumberAxis(double min, double max, double tickUnit) {
         NumberAxis axis = new NumberAxis();
-        axis.setAutoRanging(false);
         axis.setLowerBound(min);
         axis.setUpperBound(max);
         axis.setTickUnit(tickUnit);

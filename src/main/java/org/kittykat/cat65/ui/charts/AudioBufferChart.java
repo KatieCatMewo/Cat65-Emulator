@@ -9,5 +9,6 @@ public class AudioBufferChart extends DebugChart {
         getData().add(series);
         setDebugLine(DebugData.VISUAL_AUDIO_BUFFER_SIZE / 2);
         getStyleClass().add("debug-audio-chart");
+        disableAutoRanging();
     }
 }

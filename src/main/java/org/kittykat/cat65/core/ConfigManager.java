@@ -30,7 +30,7 @@ public abstract class ConfigManager {
         clockPeriodProperty.addListener((obs, oldVal, newVal) -> clockPeriod = (int) newVal);
         vsyncProperty.addListener((obs, oldVal, newVal) -> vsync = newVal);
         syncVideoClocksProperty.addListener((obs, oldVal, newVal) -> syncVideoClocks = newVal);
-        masterVolumeProperty.addListener((obs, oldVal, newVal) -> masterVolume = ((float) newVal) / 100f);
+        masterVolumeProperty.addListener((obs, oldVal, newVal) -> masterVolume = ((int) newVal) / 100f);
     }
 
     public static double getTargetClockSpeed() {

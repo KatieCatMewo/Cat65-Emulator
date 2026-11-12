@@ -17,6 +17,8 @@ public class DebugLineChart extends DebugChart {
             getData().add(new XYChart.Series<>());
         }
         getStyleClass().add("debug-line-chart");
+
+        disableAutoRanging();
     }
 
     public void add(double... points) {
