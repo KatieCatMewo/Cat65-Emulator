@@ -10,10 +10,11 @@ import java.util.ArrayList;
 public abstract class DebugData {
     public static final int VISUAL_AUDIO_BUFFER_SIZE = 2 * AudioManager.READ_BUFFER_SIZE;
 
-    public  static final float MIN_AUDIO_SCALE     = 1f;
-    public  static final float MAX_AUDIO_SCALE     = .1f;
-    public  static final float DEFAULT_AUDIO_SCALE = MIN_AUDIO_SCALE;
-    public  static final FloatProperty audioScaleProperty = new SimpleFloatProperty(DEFAULT_AUDIO_SCALE);
+    public static final float MIN_AUDIO_SCALE     = 1f;
+    public static final float MAX_AUDIO_SCALE     = .1f;
+    public static final float DEFAULT_AUDIO_SCALE = MIN_AUDIO_SCALE;
+    public static final FloatProperty audioScaleProperty = new SimpleFloatProperty(DEFAULT_AUDIO_SCALE);
+    public static volatile float audioScale = DEFAULT_AUDIO_SCALE;
 
     public  static volatile int  audioBufferFillSum   = 0;
     public  static volatile int  audioBufferFillCount = 0;
@@ -25,6 +26,16 @@ public abstract class DebugData {
     public static volatile int  executedClocks            = 0;
     public static volatile long lastClockSpeedSampleTime  = System.nanoTime();
     public static final ArrayList<Double> lastClockSpeeds = new ArrayList<>();
+
+    static {
+        audioScaleProperty.addListener((obs, oldVal, newVal) -> audioScale = (float) newVal);
+
+        ObservableList<XYChart.Data<Number, Number>> series = audioSeries.getData();
+        series.clear();
+        for (int s = 0; s < VISUAL_AUDIO_BUFFER_SIZE; s++) {
+            series.add(new XYChart.Data<>(s, 0f));
+        }
+    }
 
     public static float getAudioBufferFillLevel() {
         int sum = audioBufferFillSum;
@@ -55,9 +66,8 @@ public abstract class DebugData {
 
     public static void uiUpdate() {
         ObservableList<XYChart.Data<Number, Number>> series = audioSeries.getData();
-        series.clear();
         for (int s = 0; s < audioBuffer.length; s++) {
-            series.add(new XYChart.Data<>(s, audioBuffer[s] / audioScaleProperty.get()));
+            series.get(s).setYValue(audioBuffer[s] / audioScale);
         }
     }
 }
