@@ -1,5 +1,6 @@
 package org.kittykat.cat65.window;
 
+import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import org.kittykat.cat65.EmuHelper;
@@ -10,6 +11,9 @@ import org.kittykat.cat65.settings.NewLineVariant;
 import static org.kittykat.cat65.core.ConfigManager.*;
 
 public class ConfigWindowController extends WindowController {
+    private ChangeListener<Number> clockPeriodListener;
+    private ChangeListener<Number> masterVolumeListener;
+
     @FXML private TabPane tabPane;
 
     @FXML private Spinner<Integer> spn_clock;
@@ -49,7 +53,7 @@ public class ConfigWindowController extends WindowController {
 
     private void initGeneralTab() {
         EmuHelper.setupIntSpinner(spn_clock, MIN_CLOCK_PERIOD, MAX_CLOCK_PERIOD, clockPeriod, 1);
-        EmuHelper.bindSpinner(spn_clock, clockPeriodProperty);
+        clockPeriodListener = EmuHelper.bindSpinner(spn_clock, clockPeriodProperty);
         spn_clock.valueProperty().addListener((obs, oldVal, newVal) -> updateFrequencyLabel(newVal));
         updateFrequencyLabel(clockPeriod);
     }
@@ -66,12 +70,18 @@ public class ConfigWindowController extends WindowController {
     }
     private void initAudioTab() {
         EmuHelper.setupIntSpinner(spn_volume, MIN_MASTER_VOL, MAX_MASTER_VOL, masterVolumeProperty.get(), 1);
-        EmuHelper.bindSpinner(spn_volume, masterVolumeProperty);
+        masterVolumeListener = EmuHelper.bindSpinner(spn_volume, masterVolumeProperty);
 
         slider_volume.valueProperty().bindBidirectional(masterVolumeProperty);
     }
 
     private void updateFrequencyLabel(int period) {
         lbl_frequency.setText("(%s)".formatted(EmuHelper.formatFrequency(1_000_000_000f / period)));
+    }
+
+    @Override
+    public void onClose() {
+        clockPeriodProperty.removeListener(clockPeriodListener);
+        masterVolumeProperty.removeListener(masterVolumeListener);
     }
 }

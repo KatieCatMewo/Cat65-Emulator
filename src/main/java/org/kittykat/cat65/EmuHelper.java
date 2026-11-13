@@ -2,6 +2,7 @@ package org.kittykat.cat65;
 
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.scene.Scene;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.control.ComboBox;
@@ -95,13 +96,14 @@ public abstract class EmuHelper {
             if (!is) spinner.commitValue();
         });
     }
-    public static void bindSpinner(Spinner<Integer> spinner, IntegerProperty property) {
-        property.addListener(
-                (obs, oldValue, newValue) -> spinner.getValueFactory().setValue(newValue.intValue())
-        );
+    public static ChangeListener<Number> bindSpinner(Spinner<Integer> spinner, IntegerProperty property) {
+        ChangeListener<Number> listener = (obs, oldValue, newValue)
+                -> spinner.getValueFactory().setValue(newValue.intValue());
+        property.addListener(listener);
         spinner.getValueFactory().valueProperty().addListener(
                 (obs, oldValue, newValue) -> property.set(newValue)
         );
+        return listener;
     }
 
     public static <E extends Enum<E>> void setupComboBox(ComboBox<E> comboBox, ObjectProperty<E> property,

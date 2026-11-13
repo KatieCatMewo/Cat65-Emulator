@@ -14,7 +14,7 @@ public abstract class DebugData {
     public static final float MAX_AUDIO_SCALE     = .1f;
     public static final float DEFAULT_AUDIO_SCALE = MIN_AUDIO_SCALE;
     public static final FloatProperty audioScaleProperty = new SimpleFloatProperty(DEFAULT_AUDIO_SCALE);
-    public static volatile float audioScale = DEFAULT_AUDIO_SCALE;
+    public static volatile float audioScale = audioScaleProperty.get();
 
     public  static volatile int  audioBufferFillSum   = 0;
     public  static volatile int  audioBufferFillCount = 0;
@@ -28,7 +28,7 @@ public abstract class DebugData {
     public static final ArrayList<Double> lastClockSpeeds = new ArrayList<>();
 
     static {
-        audioScaleProperty.addListener((obs, oldVal, newVal) -> audioScale = (float) newVal);
+        audioScaleProperty.addListener((obs, oldVal, newVal) -> audioScale = newVal.floatValue());
 
         ObservableList<XYChart.Data<Number, Number>> series = audioSeries.getData();
         series.clear();

@@ -27,10 +27,10 @@ public abstract class ConfigManager {
     public static volatile float masterVolume = masterVolumeProperty.get() / 100f;
 
     static {
-        clockPeriodProperty.addListener((obs, oldVal, newVal) -> clockPeriod = (int) newVal);
+        clockPeriodProperty.addListener((obs, oldVal, newVal) -> clockPeriod = newVal.intValue());
         vsyncProperty.addListener((obs, oldVal, newVal) -> vsync = newVal);
         syncVideoClocksProperty.addListener((obs, oldVal, newVal) -> syncVideoClocks = newVal);
-        masterVolumeProperty.addListener((obs, oldVal, newVal) -> masterVolume = ((int) newVal) / 100f);
+        masterVolumeProperty.addListener((obs, oldVal, newVal) -> masterVolume = newVal.intValue() / 100f);
     }
 
     public static double getTargetClockSpeed() {

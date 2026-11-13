@@ -1,6 +1,7 @@
 package org.kittykat.cat65.window;
 
 import javafx.animation.AnimationTimer;
+import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.FileChooser;
@@ -19,6 +20,8 @@ public class MainWindowController extends WindowManager {
     private static final String WINDOW_NAME = "Cat65 Emulator";
 
     public SerialTerminalController terminal = null;
+
+    private ChangeListener<Number> clockPeriodListener;
 
     private final FileChooser romChooser = new FileChooser();
     private File romDir = new File(System.getProperty("user.home"));
@@ -49,7 +52,7 @@ public class MainWindowController extends WindowManager {
     }
     private void initClockSpinner() {
         EmuHelper.setupIntSpinner(spn_clock, MIN_CLOCK_PERIOD, MAX_CLOCK_PERIOD, clockPeriod, 1);
-        EmuHelper.bindSpinner(spn_clock, clockPeriodProperty);
+        clockPeriodListener = EmuHelper.bindSpinner(spn_clock, clockPeriodProperty);
         spn_clock.valueProperty().addListener((obs, oldVal, newVal) ->
                 lbl_targetFrequency.setText("(%s)".formatted(EmuHelper.formatFrequency(1_000_000_000d / newVal)))
         );
@@ -107,6 +110,7 @@ public class MainWindowController extends WindowManager {
     @Override
     public void onClose() {
         super.onClose();
+        clockPeriodProperty.removeListener(clockPeriodListener);
         MainManager.stop();
     }
 
