@@ -23,8 +23,8 @@ public abstract class DebugData {
     public  static int audioBufferSegment = 0;
     public  static final XYChart.Series<Number, Number> audioSeries = new XYChart.Series<>();
 
-    public static volatile int  executedClocks            = 0;
-    public static volatile long lastClockSpeedSampleTime  = System.nanoTime();
+    public static volatile int executedClocks   = 0;
+    public static long lastClockSpeedSampleTime = System.nanoTime();
     public static final ArrayList<Double> lastClockSpeeds = new ArrayList<>();
 
     static {

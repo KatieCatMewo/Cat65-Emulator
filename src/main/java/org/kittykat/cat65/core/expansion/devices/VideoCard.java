@@ -1,6 +1,5 @@
 package org.kittykat.cat65.core.expansion.devices;
 
-import javafx.application.Platform;
 import javafx.scene.image.PixelBuffer;
 import javafx.scene.image.PixelFormat;
 import org.kittykat.cat65.core.ConfigManager;
@@ -28,8 +27,10 @@ public class VideoCard extends ExpansionDevice {
     private static final int V_SYNC    = 2;
     private static final int V_BACK    = 33;
 
-    private final int[] frame       = new int[H_VISIBLE * V_VISIBLE];
-    private final int[] colorBuffer = new int[frame.length];
+    private static final int FRAME_BUFFER_SIZE = H_VISIBLE * V_VISIBLE;
+    private volatile int frameBufferOffset = 0;
+    private final int[] frameBuffers = new int[FRAME_BUFFER_SIZE * 2];
+    private final int[] colorBuffer  = new int[FRAME_BUFFER_SIZE];
     private final PixelBuffer<IntBuffer> pixelBuffer =
             new PixelBuffer<>(H_VISIBLE, V_VISIBLE, IntBuffer.wrap(colorBuffer), PixelFormat.getIntArgbPreInstance());
 
@@ -38,33 +39,33 @@ public class VideoCard extends ExpansionDevice {
     private final int[] preloadedLayers = new int[4];
     private final int[] layerRegisters  = new int[4];
 
-    private volatile int dotCounter  = 0;
-    private volatile int lineCounter = 0;
+    private int dotCounter  = 0;
+    private int lineCounter = 0;
 
-    private volatile boolean hBlank = true;
-    private volatile boolean hSync  = true;
-    private volatile boolean vBlank = true;
-    private volatile boolean vSync  = true;
+    private boolean hBlank = true;
+    private boolean hSync  = true;
+    private boolean vBlank = true;
+    private boolean vSync  = true;
     private int outputColor = 0xff_000000;
 
     private final byte[] vram00 = new byte[VRAM_SIZE];
     private final byte[] vram01 = new byte[VRAM_SIZE];
 
-    private volatile int colormapBank = 0b000;
-    private volatile int tilemapBank  = 0b000;
-    private volatile int ctrl    = 0b0000_0000;
-    private volatile int hScroll = 0x00;
+    private int colormapBank = 0b000;
+    private int tilemapBank  = 0b000;
+    private int ctrl    = 0b0000_0000;
+    private int hScroll = 0x00;
 
-    private volatile double timeAccumulator = 0d;
+    private double timeAccumulator = 0d;
 
     public VideoCard() {
         super(0b1111_1111_1111);
-        Arrays.fill(frame, 0xff_000000);
+        Arrays.fill(frameBuffers, 0xff_000000);
+        updateScreen();
         openWindow();
     }
 
     @Override
-    @SuppressWarnings("NonAtomicOperationOnVolatileField")
     public void clock() {
         timeAccumulator += CLOCK_MHZ * (ConfigManager.syncVideoClocks ? 1d : (ConfigManager.clockPeriod / 1_000d));
         while (timeAccumulator >= 1f) {
@@ -117,36 +118,38 @@ public class VideoCard extends ExpansionDevice {
 
     @SuppressWarnings("NonAtomicOperationOnVolatileField")
     private void videoClock() {
+        boolean visible = isVisible();
+
         switch (dotCounter & 0x00f) {
             case 0x0, 0x2,
                  0x4, 0x6,
                  0x8, 0xa,
-                 0xc, 0xe -> outputPixel();
-            case 0x1, 0x5 -> shiftBgRegisters();
+                 0xc, 0xe -> outputPixel(visible);
+            case 0x1, 0x5 -> shiftBgRegisters(visible);
             case 0x3 -> {
-                shiftBgRegisters();
+                shiftBgRegisters(visible);
                 preloadTile();
             }
             case 0x7 -> {
-                shiftBgRegisters();
+                shiftBgRegisters(visible);
                 getTileLayer(0);
             }
             case 0x9 -> {
-                shiftBgRegisters();
+                shiftBgRegisters(visible);
                 getTileLayer(1);
             }
             case 0xb -> {
-                shiftBgRegisters();
+                shiftBgRegisters(visible);
                 getTileLayer(2);
             }
             case 0xd -> {
-                shiftBgRegisters();
+                shiftBgRegisters(visible);
                 getTileLayer(3);
             }
             case 0x0f -> transferLayers();
         }
-        if (isVisible()) {
-            frame[lineCounter * H_VISIBLE + dotCounter] = outputColor;
+        if (visible) {
+            frameBuffers[lineCounter * H_VISIBLE + dotCounter + frameBufferOffset] = outputColor;
         }
 
         dotCounter++;
@@ -165,8 +168,8 @@ public class VideoCard extends ExpansionDevice {
                 vBlank = true;
 
                 if (ConfigManager.vsync) {
-                    System.arraycopy(frame, 0, colorBuffer, 0, frame.length);
-                    Platform.runLater(this::updateScreen);
+                    // switch frame buffers
+                    frameBufferOffset ^= FRAME_BUFFER_SIZE;
                 }
             } else if (lineCounter == (V_VISIBLE + V_FRONT)) {
                 vSync = false;
@@ -198,32 +201,31 @@ public class VideoCard extends ExpansionDevice {
         }
     }
     private void getTileLayer(int layer) {
-        int address = (tilemapBank << 13) | (nextTile << 5) | (layer << 3) | nextLineY;
-        preloadedLayers[layer] = ExpansionData.readTilesetByte(address);
+        preloadedLayers[layer] = ExpansionData.readTilesetByte((tilemapBank << 13) | (nextTile << 5) | (layer << 3) | nextLineY);
     }
     private void transferLayers() {
         if (shouldPreload()) {
             System.arraycopy(preloadedLayers, 0, layerRegisters, 0, 4);
         }
     }
-    private void shiftBgRegisters() {
-        if (isVisible()) {
+    private void shiftBgRegisters(boolean visible) {
+        if (visible) {
             for (int l = 0; l < 4; l++) {
                 layerRegisters[l] <<= 1;
             }
         }
     }
-    private void outputPixel() {
-        if (isVisible()) {
-            outputColor = 0xff_000000;
-            if (!isForceBlanking()) {
+    private void outputPixel(boolean visible) {
+        if (visible) {
+            if (isForceBlanking()) {
+                outputColor = 0xff_000000;
+            } else {
                 int paletteAddress = 0x0;
                 for (int l = 0; l < 4; l++) {
                     paletteAddress >>= 1;
                     paletteAddress |= layerRegisters[l] & 0x80;
                 }
-                paletteAddress = (paletteAddress >> 4) | 0x780;
-                outputColor = getOutputColor(readVRAM(paletteAddress));
+                outputColor = getOutputColor(readVRAM((paletteAddress >> 4) | 0x780));
             }
         }
     }
@@ -236,16 +238,16 @@ public class VideoCard extends ExpansionDevice {
     }
 
     public boolean shouldPreload() {
-        return !(vBlank & hSync);
+        return !(vBlank && hSync);
     }
     public boolean isBlanking() {
-        return !isVisible() | isForceBlanking();
+        return !isVisible() || isForceBlanking();
     }
     public boolean isForceBlanking() {
         return ((ctrl & 0b0100_0000) == 0);
     }
     public boolean isVisible() {
-        return !(hBlank | vBlank);
+        return !(hBlank || vBlank);
     }
 
     @Override
@@ -256,10 +258,9 @@ public class VideoCard extends ExpansionDevice {
     @Override
     public void updateWindow() {
         super.updateWindow();
-        if (!ConfigManager.vsync) {
-            System.arraycopy(frame, 0, colorBuffer, 0, frame.length);
-            updateScreen();
-        }
+        int bufferOffset = ConfigManager.vsync ? (frameBufferOffset ^ FRAME_BUFFER_SIZE) : frameBufferOffset;
+        System.arraycopy(frameBuffers, bufferOffset, colorBuffer, 0, FRAME_BUFFER_SIZE);
+        updateScreen();
     }
     private void updateScreen() {
         pixelBuffer.updateBuffer(buffer -> null);

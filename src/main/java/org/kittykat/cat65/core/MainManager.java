@@ -19,7 +19,7 @@ import java.util.Arrays;
 import java.util.concurrent.locks.LockSupport;
 
 public abstract class MainManager {
-    private static final int MAX_FILE_SIZE = 0x40_000;  // 256 KiB
+    private static final int MAX_FILE_SIZE = 0x4_0000;  // 256 KiB
     private static final int HEADER_SIZE = 16;
     private static final char[] ID_CHARS = {'c', '6', '5', 0x15};
 
@@ -87,17 +87,12 @@ public abstract class MainManager {
                 timeSinceLastClock = currentTime - lastTime;
                 lastTime = currentTime;
 
-                timeAccumulator += timeSinceLastClock;
-                timeAccumulator = Math.min(timeAccumulator, MAX_LAG_BUFFER + ConfigManager.clockPeriod);
+                timeAccumulator = Math.min(timeAccumulator + timeSinceLastClock, MAX_LAG_BUFFER + ConfigManager.clockPeriod);
 
                 while (timeAccumulator >= ConfigManager.clockPeriod) {
                     if (!paused || step) {
-                        if (reset) {
-                            reset();
-                            reset = false;
-                        } else {
-                            clock();
-                        }
+                        if (reset) reset();
+                        else clock();
                         DebugData.executedClocks++;
                     }
                     AudioManager.clockAudio();
@@ -126,6 +121,7 @@ public abstract class MainManager {
         if (cpu.isAtInstructionBoundary()) step = false;
     }
     public static void reset() {
+        reset = false;
         via.reset();
         acia.reset();
         ExpansionManager.reset();
@@ -165,8 +161,7 @@ public abstract class MainManager {
 
     public static int get(int address, boolean internal) {
         address &= 0xffff;
-        int select = address >> 12;
-        return 0xff & (switch (select) {
+        return 0xff & (switch (address >> 12) {
             case 0x0,0x1,0x2,0x3 -> ram[address];
             case 0x4,0x7         -> ExpansionManager.get(address, internal);
             case 0x5             -> acia.read(address - 0x5000, internal);
@@ -177,8 +172,7 @@ public abstract class MainManager {
     public static void set(int address, int value, boolean internal) {
         address &= 0xffff;
         value &= 0xff;
-        int select = address >> 12;
-        switch (select) {
+        switch (address >> 12) {
             case 0x0,0x1,0x2,0x3 -> ram[address] = (byte) value;
             case 0x4,0x7         -> ExpansionManager.set(address, value, internal);
             case 0x5             -> acia.write(address - 0x5000, value, internal);
