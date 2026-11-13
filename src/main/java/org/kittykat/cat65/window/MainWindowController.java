@@ -36,7 +36,6 @@ public class MainWindowController extends WindowManager {
         initRomChooser();
         initClockSpinner();
         startUiThread();
-        openSerialTerminal();
         mainStage.requestFocus();
         updatePausedState();
     }
