@@ -10,6 +10,10 @@ import org.kittykat.cat65.settings.NewLineVariant;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class SerialTerminalController extends WindowController {
+    private static final int MAX_PROCESS_COUNT = 512;
+    private static final int MAX_TEXT_LENGTH = 16_384;
+    private static final StringBuilder sb = new StringBuilder();
+
     @FXML
     private TextArea terminal;
 
@@ -58,30 +62,52 @@ public class SerialTerminalController extends WindowController {
     }
     @Override
     public void updateWindow() {
-        while (!printQueue.isEmpty()) {
+        boolean scollToBottom = false;
+        for (int i = 0; i < MAX_PROCESS_COUNT; i++) {
+            if (printQueue.isEmpty()) break;
             char c = printQueue.poll();
+            scollToBottom = true;
 
             if ((c == '\r') || (c == '\n')) {
                 if (ConfigManager.terminalNewLineVariant.get() == NewLineVariant.CRLF) {
-                    terminal.appendText(String.valueOf(c));
+                    sb.append(c);
                 } else {
-                    terminal.appendText("\r\n");
+                    sb.append("\r\n");
                 }
             } else if (c == '\f') {
-                terminal.clear();
+                clear();
             } else if ((c == 0x08) || (c == 0x7f)) {
                 int len = terminal.getLength();
                 if (len > 0) {
+                    appendStringBuffer();
                     terminal.deleteText(len - 1, len);
                 }
             } else {
-                terminal.appendText(String.valueOf(c));
+                sb.append(c);
             }
+        }
+        appendStringBuffer();
+        checkTextOverflow();
+        if (scollToBottom) {
+            terminal.positionCaret(terminal.getLength());
+        }
+    }
+    private void appendStringBuffer() {
+        if (!sb.isEmpty()) {
+            terminal.appendText(sb.toString());
+            sb.setLength(0);
+        }
+    }
+    private void checkTextOverflow() {
+        int removeCount = terminal.getLength() - MAX_TEXT_LENGTH;
+        if (removeCount > 0) {
+            terminal.deleteText(0, removeCount);
         }
     }
 
     @FXML
     public void clear() {
+        sb.setLength(0);
         terminal.clear();
     }
 
