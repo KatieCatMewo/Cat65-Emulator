@@ -5,8 +5,14 @@ import org.kittykat.cat65.settings.NewLineVariant;
 import org.kittykat.cat65.window.SerialTerminalController;
 
 public abstract class ConfigManager {
-    // 1kHz -> 1ms = 1_000_000ns
-    // 1MHz -> 1µs = 1_000ns
+    public static final double MIN_UPDATE_SPEED = 0.001d;
+    public static final double MAX_UPDATE_SPEED = 10d;
+    public static final double DEFAULT_UPDATE_SPEED = 1d;
+    public static final DoubleProperty updateSpeedProperty = new SimpleDoubleProperty(DEFAULT_UPDATE_SPEED);
+    public static final int DEFAULT_UPDATE_PERIOD = 100; // 10 MHz
+    public static final double DEFAULT_UPDATE_MHZ = 1_000d / DEFAULT_UPDATE_PERIOD;
+    public static volatile int updatePeriod = (int) (DEFAULT_UPDATE_PERIOD / updateSpeedProperty.get());
+
     public static final int MIN_CLOCK_PERIOD = 100;          // 10 MHz
     public static final int MAX_CLOCK_PERIOD = 100_000_000;  // 10 Hz
     public static final int DEFAULT_CLOCK_PERIOD = 1_000;    //  1 MHz
@@ -17,8 +23,6 @@ public abstract class ConfigManager {
 
     public static final BooleanProperty vsyncProperty = new SimpleBooleanProperty(true);
     public static volatile boolean vsync = vsyncProperty.get();
-    public static final BooleanProperty syncVideoClocksProperty = new SimpleBooleanProperty(true);
-    public static volatile boolean syncVideoClocks = syncVideoClocksProperty.get();
 
     public static final int MIN_MASTER_VOL     = 0;
     public static final int MAX_MASTER_VOL     = 100;
@@ -27,14 +31,19 @@ public abstract class ConfigManager {
     public static volatile float masterVolume = masterVolumeProperty.get() / 100f;
 
     static {
+        updateSpeedProperty.addListener(
+                (obs, oldVal, newVal) -> updatePeriod = (int) (DEFAULT_UPDATE_PERIOD / newVal.doubleValue())
+        );
         clockPeriodProperty.addListener((obs, oldVal, newVal) -> clockPeriod = newVal.intValue());
         vsyncProperty.addListener((obs, oldVal, newVal) -> vsync = newVal);
-        syncVideoClocksProperty.addListener((obs, oldVal, newVal) -> syncVideoClocks = newVal);
         masterVolumeProperty.addListener((obs, oldVal, newVal) -> masterVolume = newVal.intValue() / 100f);
     }
 
+    public static double getTargetUpdateSpeed() {
+        return (1_000_000_000d / DEFAULT_UPDATE_PERIOD) * updateSpeedProperty.get();
+    }
     public static double getTargetClockSpeed() {
-        return (1_000_000_000d / ConfigManager.clockPeriodProperty.get());
+        return (1_000_000_000d / clockPeriod);
     }
 
     public static void outputSerial(char c) {

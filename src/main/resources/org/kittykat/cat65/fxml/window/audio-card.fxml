@@ -21,7 +21,7 @@
     <VBox styleClass="box" spacing="8" VBox.vgrow="ALWAYS">
         <VBox fx:id="channelView" id="status" spacing="8" VBox.vgrow="ALWAYS">
             <HBox>
-                <Label styleClass="register" text="Channel  |   Volume   |            Frequency            |    Counter    |        State        |     Duty      " />
+                <Label styleClass="register" text="Channel  |   Volume   |             Frequency             |    Counter    |        State        |     Duty      " />
                 <CheckBox fx:id="check_master" mnemonicParsing="false" />
             </HBox>
         </VBox>

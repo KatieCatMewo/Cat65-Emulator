@@ -12,12 +12,15 @@ import static org.kittykat.cat65.core.ConfigManager.*;
 
 public class ConfigWindowController extends WindowController {
     private ChangeListener<Number> clockPeriodListener;
+    private ChangeListener<Number> updateSpeedListener;
     private ChangeListener<Number> masterVolumeListener;
 
     @FXML private TabPane tabPane;
 
     @FXML private Spinner<Integer> spn_clock;
     @FXML private Label lbl_frequency;
+    @FXML private Spinner<Double> spn_speed;
+    @FXML private Label lbl_speed;
 
     @FXML private ComboBox<NewLineVariant> cbx_newLineMode;
 
@@ -25,7 +28,6 @@ public class ConfigWindowController extends WindowController {
     @FXML private ComboBox<ExpansionPort> cbx_ex07;
 
     @FXML private CheckBox check_vsync;
-    @FXML private CheckBox check_syncVideoClocks;
 
     @FXML private Spinner<Integer> spn_volume;
     @FXML private Slider slider_volume;
@@ -53,9 +55,14 @@ public class ConfigWindowController extends WindowController {
 
     private void initGeneralTab() {
         EmuHelper.setupIntSpinner(spn_clock, MIN_CLOCK_PERIOD, MAX_CLOCK_PERIOD, clockPeriod, 1);
-        clockPeriodListener = EmuHelper.bindSpinner(spn_clock, clockPeriodProperty);
+        clockPeriodListener = EmuHelper.bindIntSpinner(spn_clock, clockPeriodProperty);
         spn_clock.valueProperty().addListener((obs, oldVal, newVal) -> updateFrequencyLabel(newVal));
         updateFrequencyLabel(clockPeriod);
+
+        EmuHelper.setupDoubleSpinner(spn_speed, MIN_UPDATE_SPEED, MAX_UPDATE_SPEED, updateSpeedProperty.get(), 0.01d);
+        updateSpeedListener = EmuHelper.bindDoubleSpinner(spn_speed, updateSpeedProperty);
+        spn_speed.valueProperty().addListener((obs, oldVal, newVal) -> updateSpeedLabel(newVal));
+        updateSpeedLabel(updateSpeedProperty.get());
     }
     private void initSerialTab() {
         EmuHelper.setupComboBox(cbx_newLineMode, terminalNewLineVariant, NewLineVariant.class, NewLineVariant.stringConverter);
@@ -66,11 +73,10 @@ public class ConfigWindowController extends WindowController {
     }
     private void initVideoTab() {
         check_vsync.selectedProperty().bindBidirectional(vsyncProperty);
-        check_syncVideoClocks.selectedProperty().bindBidirectional(syncVideoClocksProperty);
     }
     private void initAudioTab() {
         EmuHelper.setupIntSpinner(spn_volume, MIN_MASTER_VOL, MAX_MASTER_VOL, masterVolumeProperty.get(), 1);
-        masterVolumeListener = EmuHelper.bindSpinner(spn_volume, masterVolumeProperty);
+        masterVolumeListener = EmuHelper.bindIntSpinner(spn_volume, masterVolumeProperty);
 
         slider_volume.valueProperty().bindBidirectional(masterVolumeProperty);
     }
@@ -78,10 +84,14 @@ public class ConfigWindowController extends WindowController {
     private void updateFrequencyLabel(int period) {
         lbl_frequency.setText("(%s)".formatted(EmuHelper.formatFrequency(1_000_000_000f / period)));
     }
+    private void updateSpeedLabel(double speed) {
+        lbl_speed.setText("(%.1f%%)".formatted(speed * 100));
+    }
 
     @Override
     public void onClose() {
         clockPeriodProperty.removeListener(clockPeriodListener);
+        updateSpeedProperty.removeListener(updateSpeedListener);
         masterVolumeProperty.removeListener(masterVolumeListener);
     }
 }

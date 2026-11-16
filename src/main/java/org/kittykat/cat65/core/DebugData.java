@@ -48,7 +48,7 @@ public abstract class DebugData {
     public static double getCurrentClockSpeed() {
         long   now         = System.nanoTime();
         long   elapsedTime = now - lastClockSpeedSampleTime;
-        double clockSpeed  = executedClocks * 1_000_000_000d / elapsedTime;
+        double clockSpeed  = executedClocks * (1_000_000_000d / elapsedTime) / ConfigManager.updateSpeedProperty.get();
         executedClocks           = 0;
         lastClockSpeedSampleTime = now;
 

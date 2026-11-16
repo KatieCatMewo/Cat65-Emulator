@@ -49,6 +49,10 @@ public abstract class ExpansionManager {
         ex04.clock();
         ex07.clock();
     }
+    public static void update() {
+        ex04.update();
+        ex07.update();
+    }
     public static void reset() {
         ex04.reset();
         ex07.reset();

@@ -101,13 +101,13 @@ public class AudioChannelController extends WindowController {
                         if (c == 0) {
                             noiseFreq = AudioCard.NOISE_FREQ_VALUES[freq];
                             hz = getFrequency(noiseFreq, 1);
-                            str = "%s  |  $%1x  (%2d)  |     $%1x : $%03x (%9sHz)     |  $%03x (%4d)  |  %%%s  |              ".formatted(
+                            str = "%s  |  $%1x  (%2d)  |     $%1x : $%03x (%10sHz)      |  $%03x (%4d)  |  %%%s  |              ".formatted(
                                     CHANNEL_NAMES[c], vol, vol, freq, noiseFreq, getFrequencyString(hz),
                                     count, count, EmuHelper.getBinary(state, 16)
                             );
                         } else {
                             hz = getFrequency(freq, (c <= 2) ? 32 : 8);
-                            str = "%s  |  $%1x  (%2d)  |  $%03x (%9sHz  %8s)  |  $%03x (%4d)  |      $%02x  (%2d)      |  %s ".formatted(
+                            str = "%s  |  $%1x  (%2d)  |   $%03x (%10sHz  %8s)  |  $%03x (%4d)  |      $%02x  (%2d)      |  %s ".formatted(
                                     CHANNEL_NAMES[c], vol, vol, freq, getFrequencyString(hz), EmuHelper.getNote(hz),
                                     count, count, state, state,
                                     (duty >= 0) ? "%%%s (%s%%)".formatted(EmuHelper.getBinary(duty, 2), DUTY_CYCLES[duty]) : "           "
@@ -122,7 +122,7 @@ public class AudioChannelController extends WindowController {
     }
 
     private static double getFrequency(int value, int divisor) {
-        return ConfigManager.getTargetClockSpeed() / (divisor * (4096 - value));
+        return ConfigManager.getTargetUpdateSpeed() / ConfigManager.DEFAULT_UPDATE_MHZ / (divisor * (4096 - value));
     }
     public static String getFrequencyString(double freq) {
         return "%.2f".formatted(freq);

@@ -68,8 +68,8 @@ public abstract class AudioManager {
         audioThread.start();
     }
 
-    public static void clockAudio() {
-        sampleTimeAccumulator += ConfigManager.clockPeriod;
+    public static void updateAudio() {
+        sampleTimeAccumulator += ConfigManager.updatePeriod;
         while (sampleTimeAccumulator >= SAMPLE_PERIOD_NANOS) {
             float sample = ExpansionManager.getAudioSample() * ConfigManager.masterVolume;
             filteredSample += FILTER_ALPHA * (sample - filteredSample);

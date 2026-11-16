@@ -9,6 +9,7 @@ public abstract class ExtraChip {
 
     public void reset() {}
     public void clock() {}
+    public void update() {}
 
     public boolean getIRQ() {
         return true;

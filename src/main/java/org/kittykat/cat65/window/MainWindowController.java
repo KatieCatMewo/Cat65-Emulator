@@ -22,6 +22,7 @@ public class MainWindowController extends WindowManager {
     public SerialTerminalController terminal = null;
 
     private ChangeListener<Number> clockPeriodListener;
+    private ChangeListener<Number> updateSpeedListener;
 
     private final FileChooser romChooser = new FileChooser();
     private File romDir = new File(System.getProperty("user.home"));
@@ -29,15 +30,22 @@ public class MainWindowController extends WindowManager {
     @FXML private MenuItem mi_pause;
     @FXML private Button btn_pause;
     @FXML private Label lbl_paused;
+
     @FXML private Spinner<Integer> spn_clock;
     @FXML private Label lbl_targetFrequency;
     @FXML private Label lbl_currentFrequency;
 
+    @FXML private Spinner<Double> spn_speed;
+    @FXML private Label lbl_speed;
+
     public MainWindowController(Stage mainStage) {
         super(WINDOW_NAME, "main", mainStage);
         mainStage.setResizable(false);
+
         initRomChooser();
         initClockSpinner();
+        initSpeedSpinner();
+
         startUiThread();
         mainStage.requestFocus();
         updatePausedState();
@@ -52,9 +60,16 @@ public class MainWindowController extends WindowManager {
     }
     private void initClockSpinner() {
         EmuHelper.setupIntSpinner(spn_clock, MIN_CLOCK_PERIOD, MAX_CLOCK_PERIOD, clockPeriod, 1);
-        clockPeriodListener = EmuHelper.bindSpinner(spn_clock, clockPeriodProperty);
+        clockPeriodListener = EmuHelper.bindIntSpinner(spn_clock, clockPeriodProperty);
         spn_clock.valueProperty().addListener((obs, oldVal, newVal) ->
                 lbl_targetFrequency.setText("(%s)".formatted(EmuHelper.formatFrequency(1_000_000_000d / newVal)))
+        );
+    }
+    private void initSpeedSpinner() {
+        EmuHelper.setupDoubleSpinner(spn_speed, MIN_UPDATE_SPEED, MAX_UPDATE_SPEED, DEFAULT_UPDATE_SPEED, 0.01d);
+        updateSpeedListener = EmuHelper.bindDoubleSpinner(spn_speed, updateSpeedProperty);
+        spn_speed.valueProperty().addListener((obs, oldVal, newVal) ->
+                lbl_speed.setText("(%.1f%%)".formatted(newVal * 100))
         );
     }
 
@@ -111,6 +126,7 @@ public class MainWindowController extends WindowManager {
     public void onClose() {
         super.onClose();
         clockPeriodProperty.removeListener(clockPeriodListener);
+        updateSpeedProperty.removeListener(updateSpeedListener);
         MainManager.stop();
     }
 

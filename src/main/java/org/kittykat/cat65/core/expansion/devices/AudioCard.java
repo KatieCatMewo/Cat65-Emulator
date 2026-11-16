@@ -8,6 +8,8 @@ import org.kittykat.cat65.window.WindowController;
 import java.util.Arrays;
 
 public class AudioCard extends AudioExpansion {
+    private int clockDivider = 0;
+
     public static final int[] NOISE_FREQ_VALUES = {
             0b1111_1111_1011, 0b1111_1111_0111, 0b1111_1110_1111, 0b1111_1101_1111,
             0b1111_1011_1111, 0b1111_1001_1111, 0b1111_0111_1111, 0b1111_0101_1111,
@@ -41,22 +43,26 @@ public class AudioCard extends AudioExpansion {
     }
 
     @Override
-    public void clock() {
-        if (++noiseCounter > 0xfff) {
-            noiseCounter = NOISE_FREQ_VALUES[noiseFreq];
-            int bit      = ((noiseLFSR >> 13) ^ (noiseLFSR >> 14)) & 0x0001;
-            noiseLFSR    = ((noiseLFSR << 1) | (bit ^ 0b1));
-        }
-        for (int t = 0; t < triCounters.length; t++) {
-            if (++triCounters[t] > 0xfff) {
-                triCounters[t] = (t == 0) ? tri01Freq : tri02Freq;
-                triStates[t]   = (triStates[t] + 1) & 0b1_1111;
+    public void update() {
+        // when update runs at 10MHz so this divides it down to 1MHz
+        clockDivider = (clockDivider + 1) % 10;
+        if (clockDivider == 0) {
+            if (++noiseCounter > 0xfff) {
+                noiseCounter = NOISE_FREQ_VALUES[noiseFreq];
+                int bit = ((noiseLFSR >> 13) ^ (noiseLFSR >> 14)) & 0x0001;
+                noiseLFSR = ((noiseLFSR << 1) | (bit ^ 0b1));
             }
-        }
-        for (int p = 0; p < pulseCounters.length; p++) {
-            if (++pulseCounters[p] > 0xfff) {
-                pulseCounters[p] = pulseFreq[p];
-                pulseStates[p]   = (pulseStates[p] + 1) & 0b111;
+            for (int t = 0; t < triCounters.length; t++) {
+                if (++triCounters[t] > 0xfff) {
+                    triCounters[t] = (t == 0) ? tri01Freq : tri02Freq;
+                    triStates[t] = (triStates[t] + 1) & 0b1_1111;
+                }
+            }
+            for (int p = 0; p < pulseCounters.length; p++) {
+                if (++pulseCounters[p] > 0xfff) {
+                    pulseCounters[p] = pulseFreq[p];
+                    pulseStates[p] = (pulseStates[p] + 1) & 0b111;
+                }
             }
         }
     }

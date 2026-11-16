@@ -66,9 +66,9 @@ public class VideoCard extends ExpansionDevice {
     }
 
     @Override
-    public void clock() {
-        timeAccumulator += CLOCK_MHZ * (ConfigManager.syncVideoClocks ? 1d : (ConfigManager.clockPeriod / 1_000d));
-        while (timeAccumulator >= 1f) {
+    public void update() {
+        timeAccumulator += (CLOCK_MHZ / ConfigManager.DEFAULT_UPDATE_MHZ);
+        while (timeAccumulator >= 1d) {
             videoClock();
             timeAccumulator -= 1f;
         }

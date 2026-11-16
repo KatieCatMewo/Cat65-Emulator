@@ -1,5 +1,6 @@
 package org.kittykat.cat65;
 
+import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -78,14 +79,13 @@ public abstract class EmuHelper {
     public static void setupIntSpinner(Spinner<Integer> spinner, int min, int max, int initial, int step) {
         SpinnerValueFactory.IntegerSpinnerValueFactory factory = new SpinnerValueFactory.IntegerSpinnerValueFactory(min, max, initial, step);
         spinner.setValueFactory(factory);
-        StringConverter<Integer> converter = factory.getConverter();
         factory.setConverter(new StringConverter<>() {
             @Override public String toString(Integer v) {
-                return converter.toString(v);
+                return v.toString();
             }
             @Override public Integer fromString(String s) {
                 try {
-                    return converter.fromString(s);
+                    return Integer.parseInt(s);
                 } catch (NumberFormatException e) {
                     spinner.cancelEdit();
                     return factory.getValue();
@@ -96,9 +96,39 @@ public abstract class EmuHelper {
             if (!is) spinner.commitValue();
         });
     }
-    public static ChangeListener<Number> bindSpinner(Spinner<Integer> spinner, IntegerProperty property) {
+    public static ChangeListener<Number> bindIntSpinner(Spinner<Integer> spinner, IntegerProperty property) {
         ChangeListener<Number> listener = (obs, oldValue, newValue)
                 -> spinner.getValueFactory().setValue(newValue.intValue());
+        property.addListener(listener);
+        spinner.getValueFactory().valueProperty().addListener(
+                (obs, oldValue, newValue) -> property.set(newValue)
+        );
+        return listener;
+    }
+
+    public static void setupDoubleSpinner(Spinner<Double> spinner, double min, double max, double initial, double step) {
+        SpinnerValueFactory.DoubleSpinnerValueFactory factory = new SpinnerValueFactory.DoubleSpinnerValueFactory(min, max, initial, step);
+        spinner.setValueFactory(factory);
+        factory.setConverter(new StringConverter<>() {
+            @Override public String toString(Double v) {
+                return "%.3f".formatted(v);
+            }
+            @Override public Double fromString(String s) {
+                try {
+                    return Double.parseDouble(s);
+                } catch (NumberFormatException e) {
+                    spinner.cancelEdit();
+                    return factory.getValue();
+                }
+            }
+        });
+        spinner.focusedProperty().addListener((obs, was, is) -> {
+            if (!is) spinner.commitValue();
+        });
+    }
+    public static ChangeListener<Number> bindDoubleSpinner(Spinner<Double> spinner, DoubleProperty property) {
+        ChangeListener<Number> listener = (obs, oldValue, newValue)
+                -> spinner.getValueFactory().setValue(newValue.doubleValue());
         property.addListener(listener);
         spinner.getValueFactory().valueProperty().addListener(
                 (obs, oldValue, newValue) -> property.set(newValue)
@@ -113,6 +143,14 @@ public abstract class EmuHelper {
         comboBox.setConverter(converter);
     }
 
+    public static void applyCSS(Scene scene) {
+        if (CSS != null) {
+            scene.getStylesheets().add(CSS.toExternalForm());
+        } else {
+            System.err.println("[!] Could not load the stylesheet...");
+        }
+    }
+
     public static String formatFrequency(double frequency) {
         String unit = "Hz";
         if (frequency >= 1_000_000d) {
@@ -124,15 +162,6 @@ public abstract class EmuHelper {
         }
         return "%.2f %s".formatted(frequency, unit);
     }
-
-    public static void applyCSS(Scene scene) {
-        if (CSS != null) {
-            scene.getStylesheets().add(CSS.toExternalForm());
-        } else {
-            System.err.println("[!] Could not load the stylesheet...");
-        }
-    }
-
     public static String getNote(double freq) {
         if (freq < 20d) {
             return "-  -  --c";

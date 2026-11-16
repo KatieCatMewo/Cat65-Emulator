@@ -18,6 +18,9 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.concurrent.locks.LockSupport;
 
+import static org.kittykat.cat65.core.ConfigManager.updatePeriod;
+import static org.kittykat.cat65.core.ConfigManager.clockPeriod;
+
 public abstract class MainManager {
     private static final int MAX_FILE_SIZE = 0x4_0000;  // 256 KiB
     private static final int HEADER_SIZE = 16;
@@ -55,7 +58,7 @@ public abstract class MainManager {
     public static MainWindowController mainWindowController;
 
     private static final long MAX_LAG_BUFFER = 50_000_000L;  // 50 ms
-    private static long timeSinceLastClock = System.nanoTime();
+    private static long timeSinceLastUpdate = System.nanoTime();
 
     public static volatile boolean running = true;
     public static volatile boolean paused  = true;
@@ -75,58 +78,61 @@ public abstract class MainManager {
     }
 
     @SuppressWarnings("NonAtomicOperationOnVolatileField")
-    public static void startClockThread() {
-        Thread clockThread = new Thread(() -> {
+    public static void startEmulatorThread() {
+        Thread updateThread = new Thread(() -> {
             long lastTime = System.nanoTime();
-            long timeAccumulator = 0L;
+            long updateTimeAccumulator = 0L;
+            long clockTimeAccumulator = 0L;
             long currentTime;
             long sleepTime;
 
             while (running) {
                 currentTime = System.nanoTime();
-                timeSinceLastClock = currentTime - lastTime;
+                timeSinceLastUpdate = currentTime - lastTime;
                 lastTime = currentTime;
 
-                timeAccumulator = Math.min(timeAccumulator + timeSinceLastClock, MAX_LAG_BUFFER + ConfigManager.clockPeriod);
+                updateTimeAccumulator = Math.min(updateTimeAccumulator + timeSinceLastUpdate, MAX_LAG_BUFFER);
 
-                while (timeAccumulator >= ConfigManager.clockPeriod) {
+                while (updateTimeAccumulator >= updatePeriod) {
                     if (!paused || step) {
-                        if (reset) reset();
-                        else clock();
-                        DebugData.executedClocks++;
+                        clockTimeAccumulator += ConfigManager.DEFAULT_UPDATE_PERIOD;
+                        if (reset) {
+                            reset = false;
+                            via.reset();
+                            acia.reset();
+                            ExpansionManager.reset();
+                            cpu.reset();
+                            step = false;
+                        } else {
+                            ExpansionManager.update();
+                            if (clockTimeAccumulator >= clockPeriod) {
+                                ExpansionManager.clock();
+                                via.clock();
+                                acia.clock();
+                                cpu.clock();
+                                if (cpu.isAtInstructionBoundary()) step = false;
+
+                                DebugData.executedClocks++;
+                                clockTimeAccumulator -= clockPeriod;
+                            }
+                        }
                     }
-                    AudioManager.clockAudio();
-                    timeAccumulator -= ConfigManager.clockPeriod;
+                    AudioManager.updateAudio();
+                    updateTimeAccumulator -= updatePeriod;
                 }
 
-                sleepTime = ConfigManager.clockPeriod - timeAccumulator;
+                sleepTime = updatePeriod - updateTimeAccumulator;
                 if (sleepTime > 0L) {
                     LockSupport.parkNanos(sleepTime);
                 }
             }
-        }, "Cat65 Clock");
-        clockThread.setDaemon(true);
-        clockThread.start();
+        }, "Cat65 Update");
+        updateThread.setDaemon(true);
+        updateThread.start();
     }
 
     public static void startUi(Stage stage) {
         mainWindowController = new MainWindowController(stage);
-    }
-
-    public static void clock() {
-        via.clock();
-        acia.clock();
-        ExpansionManager.clock();
-        cpu.clock();
-        if (cpu.isAtInstructionBoundary()) step = false;
-    }
-    public static void reset() {
-        reset = false;
-        via.reset();
-        acia.reset();
-        ExpansionManager.reset();
-        cpu.reset();
-        step = false;
     }
 
     public static int getPA(int pinState) {

@@ -17,7 +17,7 @@ public class Cat65 extends Application {
     @SuppressWarnings("CallToPrintStackTrace")
     public void start(Stage mainStage) {
         try {
-            MainManager.startClockThread();
+            MainManager.startEmulatorThread();
             AudioManager.startAudioThread();
             MainManager.startUi(mainStage);
         } catch (Exception e) {
