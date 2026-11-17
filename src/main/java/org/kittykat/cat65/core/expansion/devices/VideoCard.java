@@ -70,7 +70,7 @@ public class VideoCard extends ExpansionDevice {
         timeAccumulator += (CLOCK_MHZ / ConfigManager.DEFAULT_UPDATE_MHZ);
         while (timeAccumulator >= 1d) {
             videoClock();
-            timeAccumulator -= 1f;
+            timeAccumulator -= 1d;
         }
     }
 

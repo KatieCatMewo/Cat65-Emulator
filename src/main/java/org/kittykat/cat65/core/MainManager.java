@@ -105,11 +105,13 @@ public abstract class MainManager {
                             cpu.reset();
                             step = false;
                         } else {
+                            via.update();
+                            acia.update();
                             ExpansionManager.update();
                             if (clockTimeAccumulator >= clockPeriod) {
-                                ExpansionManager.clock();
                                 via.clock();
                                 acia.clock();
+                                ExpansionManager.clock();
                                 cpu.clock();
                                 if (cpu.isAtInstructionBoundary()) step = false;
 
