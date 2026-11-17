@@ -22,9 +22,10 @@ import static org.kittykat.cat65.core.ConfigManager.updatePeriod;
 import static org.kittykat.cat65.core.ConfigManager.clockPeriod;
 
 public abstract class MainManager {
-    private static final int MAX_FILE_SIZE = 0x4_0000;  // 256 KiB
     private static final int HEADER_SIZE = 16;
     private static final char[] ID_CHARS = {'c', '6', '5', 0x15};
+    private static final int MIN_FILE_SIZE = HEADER_SIZE; // 16 B
+    private static final int MAX_FILE_SIZE = 0x4_0000;    // 256 KiB
 
     private static final Bus bus = new Bus() {
         @Override
@@ -201,9 +202,11 @@ public abstract class MainManager {
             System.out.println();
 
             Path path = file.toPath();
-            if (Files.size(path) > MAX_FILE_SIZE) {
-                System.err.printf("[!] Selected file is larger than the maximum file size of %d bytes!\n", MAX_FILE_SIZE);
-                return;
+            long size = Files.size(path);
+            if (size < MIN_FILE_SIZE) {
+                throw new IOException("[!] Selected file is smaller than the minimum file size of %d bytes!\n".formatted(MIN_FILE_SIZE));
+            } else if (size > MAX_FILE_SIZE) {
+                throw new IOException("[!] Selected file is larger than the maximum file size of %d bytes!\n".formatted(MAX_FILE_SIZE));
             }
             byte[] data = Files.readAllBytes(path);
 
@@ -239,11 +242,8 @@ public abstract class MainManager {
             rom[i] = (i < file.length) ? file[i] : 0x00;
         }
     }
-    private static void loadC65(byte[] file) throws IOException {
+    private static void loadC65(byte[] file) {
         System.out.println("[#] loading .c65 file");
-        if (file.length < HEADER_SIZE) {
-            throw new IOException("A .c65 ROM needs to be at least %d bytes!".formatted(HEADER_SIZE));
-        }
         // 0x7 to 0xf are reserved for future use
 
         System.out.println("[*] loading Expansion...");
