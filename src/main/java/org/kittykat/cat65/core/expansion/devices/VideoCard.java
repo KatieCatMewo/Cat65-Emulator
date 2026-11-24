@@ -17,12 +17,12 @@ public class VideoCard extends ExpansionDevice {
     private static final int   REG_ADDR_MASK = 0b0000_0000_0111;
     private static final int   VRAM_SIZE = 0x800;
 
-    private static final int H_VISIBLE = 640;
+    public  static final int H_VISIBLE = 640;
     private static final int H_FRONT   = 16;
     private static final int H_SYNC    = 96;
     private static final int H_BACK    = 48;
 
-    private static final int V_VISIBLE = 480;
+    public  static final int V_VISIBLE = 480;
     private static final int V_FRONT   = 10;
     private static final int V_SYNC    = 2;
     private static final int V_BACK    = 33;

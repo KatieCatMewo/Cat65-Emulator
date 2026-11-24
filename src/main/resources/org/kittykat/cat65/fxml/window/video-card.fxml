@@ -17,7 +17,7 @@
             <MenuItem mnemonicParsing="false" text="Help" />
         </Menu>
     </MenuBar>
-    <VBox alignment="CENTER" spacing="5" styleClass="box" VBox.vgrow="ALWAYS">
-        <ImageView fx:id="screen" preserveRatio="true" smooth="false" styleClass="screen" />
+    <VBox fx:id="screenContainer" alignment="CENTER" spacing="5" styleClass="box" VBox.vgrow="ALWAYS">
+        <ImageView fx:id="screen" preserveRatio="true" smooth="false" styleClass="screen" managed="false" />
     </VBox>
 </VBox>
