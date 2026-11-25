@@ -17,7 +17,7 @@ import java.util.Locale;
 import java.util.logging.Logger;
 
 public class MemoryViewController extends WindowController {
-    private static final String WINDOW_NAME = "Cat65 Memory Viewer";
+    private static final String WINDOW_NAME = "Cat65 Memory Viewer [%s]";
     private static final double MAX_FONT_SIZE      = 12d;
     private static final double FONT_SIZE_CONSTANT = MAX_FONT_SIZE / 550d;
 
@@ -40,12 +40,12 @@ public class MemoryViewController extends WindowController {
     }
 
     public MemoryViewController() {
-        super("%s [%s]".formatted(WINDOW_NAME, DEFAULT_MEMORY_REGION.getName()), "memory-viewer");
+        super(WINDOW_NAME.formatted(DEFAULT_MEMORY_REGION.getName()), "memory-viewer");
 
         EmuHelper.setupComboBox(cbx_memoryRegion, memoryRegionProperty, MemoryRegion.class, MemoryRegion.stringConverter);
         memoryRegionProperty.addListener((obs, oldVal, newVal) -> {
             memoryRegion = newVal;
-            window.setTitle("%s [%s]".formatted(WINDOW_NAME, memoryRegion.getName()));
+            window.setTitle(WINDOW_NAME.formatted(memoryRegion.getName()));
             setupVisualizer();
         });
         memView.setItems(lines);

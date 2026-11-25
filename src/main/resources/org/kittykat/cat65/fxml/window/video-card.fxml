@@ -13,9 +13,6 @@
         <Menu mnemonicParsing="false" text="Debug">
             <MenuItem mnemonicParsing="false" onAction="#viewPalette" text="Palette Viewer" />
         </Menu>
-        <Menu mnemonicParsing="false" text="Help">
-            <MenuItem mnemonicParsing="false" text="Help" />
-        </Menu>
     </MenuBar>
     <VBox fx:id="screenContainer" alignment="CENTER" spacing="5" styleClass="box" VBox.vgrow="ALWAYS">
         <ImageView fx:id="screen" preserveRatio="true" smooth="false" styleClass="screen" managed="false" />
